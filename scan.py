@@ -9,17 +9,17 @@ import os
 import shutil
 
 sys.setrecursionlimit(1 << 30)
-shutil.rmtree("Desktop/slices/")
-os.makedirs("Desktop/slices/")
+shutil.rmtree("/Users/tru/Desktop/slices/")
+os.makedirs("/Users/tru/Desktop/slices/")
 
 print('loading bins')
 
 color = 2
 bins = np.array(pd.read_csv(
-    '/Users/tru/Workspace/recognition/data/colorBins{}.txt'.format(color), header=None)[0])
+    '/Users/tru/Workspace/surrep/recognition/data/colorBins{}.txt'.format(color), header=None)[0])
 identifier = [256 ** 2, 256 ** 1, 256 ** 0]
 
-original = imread('/Users/tru/Desktop/photos/danid.jpg')
+original = imread('/Users/tru/Desktop/photos/clz1.jpg')
 image = bins[original.dot(identifier)]
 rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
@@ -76,10 +76,10 @@ i = 0
 while len(edges):
     shape = connect(Shape(), *next(iter(edges)))
     if shape.area() > 10:
-        imsave('Desktop/slices/try{}.jpg'.format(i),
+        imsave('/Users/tru/Desktop/slices/try{}.jpg'.format(i),
                original[shape.index_tuple()])
         i += 1
 end = time.time()
 print(end - start)
 
-imsave('Desktop/out{}.jpg'.format(color), out)
+imsave('/Users/tru/Desktop/out{}.jpg'.format(color), out)
