@@ -1,71 +1,68 @@
 
 
-const table = document.createElement("table");
+
 const squareRoot = 28
-const cells = mnist[8].get()
+const cells = mnist[3].get()
 
-function clickListener(event) {
-    cells[event.target.id] = !cells[event.target.id]
+function getPixelID(r, c) {
+    return r * squareRoot + c
+}
 
-    event.target.style.backgroundColor =
-        cells[event.target.id]
-            ? 'aqua'
-            : 'white'
+function getRowAndCol(id) {
+    return [Math.floor(id / squareRoot), id % squareRoot]
+}
+
+function getCell(id) {
+    return document.getElementById(id)
+}
+
+function startFlood(set, r, c) {
+    const id = getPixelID(r, c)
+
+    if (cells[id] && !set.has(id)) {
+        getCell(id).style.backgroundColor = 'white'
+        set.add(id)
+
+        startFlood(set, r - 1, c - 1)
+        startFlood(set, r - 1, c)
+        startFlood(set, r - 1, c + 1)
+
+        startFlood(set, r, c - 1)
+        startFlood(set, r, c + 1)
+
+        startFlood(set, r + 1, c - 1)
+        startFlood(set, r + 1, c)
+        startFlood(set, r + 1, c + 1)
+    }
 }
 
 function createCell(r, c) {
     const cell = document.createElement('td')
-    cell.id = r * squareRoot + c
-    cell.addEventListener('click', clickListener)
-    cell.style.backgroundColor = cells[cell.id] ? 'aqua' : 'white'
+
+    cell.id = getPixelID(r, c)
+    cell.addEventListener('click', startFlood)
+    cell.style.backgroundColor = 'black'
 
     return cell
 }
 
-function squaredDist(coord1, coord2) {
-    return coord1.reduce(function (dist, coord1i, i) {
-        return dist + Math.pow(coord1i - coord2[i], 2)
-    }, 0)
-}
+function createTable() {
 
-function computeDistances() {
-    let distances = new Set()
+    const table = document.createElement("table");
 
-    for (let i = 0; i < cells.length; i++) {
-        for (let j = 0; j < cells.length; j++) {
-            if (cells[i] && cells[j] && i != j) {
-                const iCoord = [Math.floor(i / squareRoot), i % squareRoot]
-                const jCoord = [Math.floor(j / squareRoot), j % squareRoot]
-
-                distances.add(squaredDist(iCoord, jCoord))
-            }
+    for (let r = 0; r < squareRoot; r++) {
+        const currentRow = table.insertRow()
+        for (let c = 0; c < squareRoot; c++) {
+            currentRow.appendChild(createCell(r, c))
         }
     }
 
-    let max = 0
-    let sum = 0
-    for (let dist of Array.from(distances)) {
-        sum += dist
-        if (dist > max)
-            max = dist
-    }
-
-    return sum
-
+    document.body.appendChild(table)
+    return table
 }
 
+const table = createTable()
 
 
 
-
-
-for (let r = 0; r < squareRoot; r++) {
-    const currentRow = table.insertRow()
-    for (let c = 0; c < squareRoot; c++) {
-        currentRow.appendChild(createCell(r, c))
-    }
-
-}
-
-document.body.appendChild(table)
 

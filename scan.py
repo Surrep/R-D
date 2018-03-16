@@ -19,7 +19,7 @@ bins = np.array(pd.read_csv(
     '/Users/tru/Workspace/surrep/recognition/data/colorBins{}.txt'.format(color), header=None)[0])
 identifier = [256 ** 2, 256 ** 1, 256 ** 0]
 
-original = imread('/Users/tru/Desktop/photos/clz1.jpg')
+original = imread('/Users/tru/Desktop/photos/deal.jpg')
 image = bins[original.dot(identifier)]
 rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
