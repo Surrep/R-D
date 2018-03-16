@@ -5,6 +5,11 @@ const cells = new Array(squareRoot * squareRoot)
 function clickListener(event) {
     console.log(event.target.id)
     cells[event.target.id] = !cells[event.target.id]
+
+    event.target.style.backgroundColor =
+        cells[event.target.id]
+            ? 'aqua'
+            : 'white'
 }
 
 function createCell(r, c) {
