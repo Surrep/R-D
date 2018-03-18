@@ -4,9 +4,12 @@ class Table {
         this.rows = rows
         this.cols = cols
         this.data = data
-        this.table = document.createElement("table");
+        this.visited = new Set()
 
+        this.table = document.createElement("table");
         document.body.appendChild(this.table)
+
+        this.sync()
     }
 
     sync() {
@@ -32,6 +35,16 @@ class Table {
 
     getCell(id) {
         return document.getElementById(id)
+    }
+
+    getCells() {
+        const tBody = this.table.children[0]
+        const rows = tBody.children
+
+        return Array.from(rows).map(function (row) {
+            return Array.from(row.children)
+        })
+
     }
 
 }

@@ -1,21 +1,22 @@
 
-function startFlood(set, r, c) {
-    const id = Table.getPixelID(r, c, 28)
+function startFlood(region, r, c, dir) {
+    const id = region.getPixelID(r, c)
 
-    if (cells[id] && !set.has(id)) {
+    if (region.data[id] && !region.visited.has(id)) {
 
-        Table.getCell(id).style.backgroundColor = 'aqua'
-        set.add(id)
+        region.getCell(id).style.backgroundColor = 'aqua'
+        region.visited.add(id)
+        console.log(dir)
 
-        startFlood(set, r - 1, c - 1)
-        startFlood(set, r - 1, c)
-        startFlood(set, r - 1, c + 1)
+        startFlood(region, r - 1, c - 1, "\\")
+        startFlood(region, r - 1, c, "|")
+        startFlood(region, r - 1, c + 1, "/")
 
-        startFlood(set, r, c - 1)
-        startFlood(set, r, c + 1)
+        startFlood(region, r, c - 1, "-")
+        startFlood(region, r, c + 1, "-")
 
-        startFlood(set, r + 1, c - 1)
-        startFlood(set, r + 1, c)
-        startFlood(set, r + 1, c + 1)
+        startFlood(region, r + 1, c - 1, "/")
+        startFlood(region, r + 1, c, "|")
+        startFlood(region, r + 1, c + 1, "\\")
     }
 }
