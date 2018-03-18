@@ -1,9 +1,10 @@
 
 function startFlood(set, r, c) {
-    const id = getPixelID(r, c)
+    const id = Table.getPixelID(r, c, 28)
 
     if (cells[id] && !set.has(id)) {
-        getCell(id).style.backgroundColor = 'white'
+
+        Table.getCell(id).style.backgroundColor = 'aqua'
         set.add(id)
 
         startFlood(set, r - 1, c - 1)

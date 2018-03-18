@@ -1,43 +1,37 @@
 
-
-class Cell {
-    constructor(id, action) {
-        this.cell = document.createElement('td')
-        this.cell.id = id
-        this.cell.style = style
-        this.cell.addEventListener('click', action)
-    }
-}
-
 class Table {
-    constructor(rows, cols, action) {
+    constructor(rows, cols, data) {
         this.rows = rows
         this.cols = cols
-
+        this.data = data
         this.table = document.createElement("table");
 
+        document.body.appendChild(this.table)
+    }
+
+    sync() {
         for (let r = 0; r < this.rows; r++) {
             const currentRow = this.table.insertRow()
             for (let c = 0; c < this.cols; c++) {
-                const cell = new Cell(this.getPixelID(r, c), action)
+                const cell = document.createElement('td')
+                cell.id = this.getPixelID(r, c)
+                cell.style.backgroundColor = this.data[cell.id] ? 'white' : 'black'
+
                 currentRow.appendChild(cell)
             }
         }
-
-        document.body.appendChild(this.table)
-
     }
 
     getPixelID(r, c) {
         return r * this.cols + c
     }
 
-    getRowAndColFromID(id) {
-        return [Math.floor(id / this.cols), id % this.cols]
+    getRowAndColFromID(id, numCols) {
+        return [Math.floor(id / numCols), id % numCols]
     }
 
     getCell(id) {
         return document.getElementById(id)
     }
-}
 
+}
