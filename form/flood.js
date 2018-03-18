@@ -7,16 +7,29 @@ function flood(region, r, c, dir = "") {
         region.getCell(id).style.backgroundColor = region.color
         region.visited.add(id)
 
+        let result = false
         console.log(r, c, dir)
-        flood(region, r - 1, c - 1, "\\")
-        flood(region, r - 1, c, "|")
-        flood(region, r - 1, c + 1, "/")
+        result = flood(region, r - 1, c - 1, "\\")
+        if (result) return true
+        result = flood(region, r - 1, c, "|")
+        if (result) return true
+        result = flood(region, r - 1, c + 1, "/")
+        if (result) return true
 
-        flood(region, r, c - 1, "-")
-        flood(region, r, c + 1, "-")
+        result = flood(region, r, c - 1, "-")
+        if (result) return true
+        result = flood(region, r, c + 1, "-")
+        if (result) return true
 
-        flood(region, r + 1, c - 1, "/")
-        flood(region, r + 1, c, "|")
-        flood(region, r + 1, c + 1, "\\")
+        result = flood(region, r + 1, c - 1, "/")
+        if (result) return true
+        result = flood(region, r + 1, c, "|")
+        if (result) return true
+        result = flood(region, r + 1, c + 1, "\\")
+        if (result) return true
+
+        return true
+
     }
+
 }
