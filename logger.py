@@ -1,3 +1,5 @@
+from edges.bitmap import write_map
+
 import os
 import time
 import sys
@@ -11,6 +13,7 @@ while True:
     added = [f for f in after if not f in before]
 
     if added:
-        print(added)
+        for f in added:
+            write_map("{}/{}".format(path_to_watch, f))
 
     before = after
