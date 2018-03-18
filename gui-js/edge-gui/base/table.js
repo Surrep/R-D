@@ -26,7 +26,7 @@ class Table {
             for (let c = 0; c < this.cols; c++) {
                 const cell = document.createElement('td')
                 cell.id = this.getCellID(r, c)
-                cell.style.backgroundColor = this.data[cell.id] ? 'white' : 'black'
+                cell.style.backgroundColor = Number(this.data[cell.id]) ? 'white' : 'black'
                 this.cells.push(cell)
 
                 currentRow.appendChild(cell)
