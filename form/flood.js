@@ -4,7 +4,10 @@ function flood(region, r, c, dir = "") {
 
     if (region.data[id] && !region.visited.has(id)) {
 
-        region.getCell(id).style.backgroundImage = `url(/Users/tru/Desktop/photos/${dir}.png)`
+        if (dir)
+            region.getCell(id).style.backgroundImage =
+                `url(/Users/tru/Desktop/photos/${dir}.png)`
+
         region.visited.add(id)
 
         console.log(r, c, dir)
