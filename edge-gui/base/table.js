@@ -47,13 +47,31 @@ class Table {
     }
 
     addListener(fn) {
-        const listener = event => {
+        const listener = async (event) => {
             const [r, c] = this.getRowAndColFromID(event.target.id)
-
-            fn(this, r, c)
+            const paintings = fn(this, r, c)
 
             this.visited = new Set()
             this.color = randomColor()
+
+            let count = 0
+            const cumCell = [0, 0]
+            for (let painting of paintings) {
+                count++
+
+                const [cell, backgroundImg] = painting
+                const [row, col] = this.getRowAndColFromID(cell.id)
+
+                const centerCell = this.getCell(this.getCellID(
+                    Math.floor((cumCell[0] += row) / count),
+                    Math.floor((cumCell[1] += col) / count)
+                ))
+
+                cell.style.backgroundImage = backgroundImg
+                centerCell.style.backgroundColor = 'Orange'
+
+                await new Promise(resolve => setTimeout(resolve, 10))
+            }
         }
 
         for (let cell of this.cells)

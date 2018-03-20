@@ -2,9 +2,11 @@ from scipy.misc import imsave, imread
 
 import numpy as np
 import pandas as pd
+import sys
 
-colors = 2
+module, img_name, bins = sys.argv
 
+colors = int(bins) if bins else 2
 bins = np.array(pd.read_csv(
     '/Users/tru/Workspace/surrep/recognition/data/colorBins{}.txt'.format(colors), header=None)[0])
 
@@ -16,7 +18,7 @@ def random_color():
     return np.random.randint(0, 256, (3))
 
 
-f = bins[imread('/Users/tru/Desktop/photos/house.jpg').dot(identifier)]
+f = bins[imread('/Users/tru/Desktop/photos/{}.jpg'.format(img_name)).dot(identifier)]
 f2 = np.zeros((*f.shape, 3))
 
 for color in range(colors):

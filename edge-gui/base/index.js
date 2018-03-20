@@ -1,5 +1,5 @@
 const rawFile = new XMLHttpRequest();
-rawFile.open("GET", "emm.txt", false);
+rawFile.open("GET", "a.txt", false);
 
 rawFile.onreadystatechange = function () {
     const cells = rawFile.responseText.split('\n')
