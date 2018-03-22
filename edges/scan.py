@@ -7,6 +7,7 @@ import time
 import sys
 import os
 import shutil
+from math import pi, atan
 
 sys.setrecursionlimit(1 << 30)
 shutil.rmtree("/Users/tru/Desktop/slices/")
@@ -47,19 +48,6 @@ def detect(color, r, c):
 
 rng = 1
 
-
-def connect(shape, r, c):
-    if (r, c) in edges:
-        shape.incorporate(r, c)
-        edges.discard((r, c))
-
-        for r_off in range(-rng, rng + 1):
-            for c_off in range(-rng, rng + 1):
-                connect(shape, r + r_off, c + c_off)
-
-    return shape
-
-
 print('seeing')
 start = time.time()
 
@@ -71,7 +59,31 @@ for r in range(rng, rows - rng, 1):
 end = time.time()
 print(end - start)
 
+print('angles')
 
+
+def connect():
+    # edge = edges.pop()
+    # while len(edges):
+    # r, c = edge
+    r = 32
+    c = 54
+
+    sum_angle = 0
+    neighbors = []
+    for r_off in range(-1, 2):
+        for c_off in range(-1, 2):
+            neighbor = (r + r_off, c + c_off)
+            if neighbor in edges:
+                neighbors.append(neighbor)
+                sum_angle += pi / 2 if not c_off else atan(r_off / c_off)
+
+    print(180 * sum_angle / pi / len(neighbors))
+
+    # return shape
+
+
+connect()
 # start = time.time()
 # print('processing', len(edges))
 # i = 0
@@ -83,5 +95,6 @@ print(end - start)
 #         i += 1
 # end = time.time()
 # print(end - start)
+
 
 imsave('/Users/tru/Desktop/out{}.jpg'.format(color), out)

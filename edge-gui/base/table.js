@@ -13,9 +13,24 @@ class Table {
         this.cells = new Array()
         this.visited = new Set()
         this.color = randomColor()
-
         this.table = document.createElement("table");
+
+
+        this.header = document.createElement("h1")
+        this.header.style.fontSize = "150px"
+
+
+        this.legend = document.createElement('div')
+        this.legend.style.width = "350px"
+        this.legend.style.height = "25px"
+        this.legend.style.marginTop = "450px"
+        this.legend.style.marginLeft = "450px"
+        this.legend.style.marginBottom = "450px"
+        this.legend.style.backgroundColor = "black"
+
+        document.body.appendChild(this.header)
         document.body.appendChild(this.table)
+        document.body.appendChild(this.legend)
 
         this.sync()
     }
@@ -56,26 +71,44 @@ class Table {
 
             let count = 0
             const cumCell = [0, 0]
+            let lastCell = null
+
             for (let painting of paintings) {
                 count++
 
-                const [cell, backgroundImg] = painting
+                const [cell, backgroundColor] = painting
                 const [row, col] = this.getRowAndColFromID(cell.id)
+
+                if (lastCell) {
+                    const [row2, col2] = lastCell
+                    const angle = Math.round(180 * Math.atan((row - row2) / (col - col2)) / Math.PI)
+                    this.legend.style.transform = `rotate(${angle}deg)`
+                }
 
                 const centerCell = this.getCell(this.getCellID(
                     Math.floor((cumCell[0] += row) / count),
                     Math.floor((cumCell[1] += col) / count)
                 ))
 
-                cell.style.backgroundImage = backgroundImg
-                centerCell.style.backgroundColor = 'Orange'
+                cell.style.backgroundColor = backgroundColor
+                // centerCell.style.backgroundColor = 'Orange'
 
-                await new Promise(resolve => setTimeout(resolve, 10))
+                await new Promise(resolve => setTimeout(resolve, 700))
+
+                if (count > 11) {
+                    const [cell, backgroundImg] = paintings[count - 12]
+                    // cell.style.backgroundColor = "Orange"
+                    lastCell = this.getRowAndColFromID(cell.id)
+                }
             }
         }
 
-        for (let cell of this.cells)
+        for (let cell of this.cells) {
             cell.addEventListener('click', listener)
+            cell.addEventListener('mouseover', (event) => {
+                this.header.innerText = this.getRowAndColFromID(event.target.id)
+            })
+        }
 
         return this
     }
