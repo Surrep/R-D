@@ -1,5 +1,9 @@
 from scipy.misc import imread, imsave
+from collections import defaultdict
 from shape import Shape
+from queue import Queue
+from math import pi, atan
+
 import pandas as pd
 import numpy as np
 import pickle
@@ -7,7 +11,7 @@ import time
 import sys
 import os
 import shutil
-from math import pi, atan
+
 
 sys.setrecursionlimit(1 << 30)
 shutil.rmtree("/Users/tru/Desktop/slices/")
@@ -26,12 +30,12 @@ original = imread('/Users/tru/Desktop/photos/' + img_name)
 image = bins[original.dot(identifier)]
 rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
-edges = set()
+spots = set()
 
 print('loaded')
 
 
-def find_edges(r, c):
+def find_spots(r, c):
     color = image[r, c]
 
     detect(color, r - 1, c)
@@ -42,7 +46,7 @@ def find_edges(r, c):
 
 def detect(color, r, c):
     if image[r, c] != color:
-        edges.add((r, c))
+        spots.add((r, c))
         out[r, c] = [255, 255, 255]
 
 
@@ -53,48 +57,68 @@ start = time.time()
 
 for r in range(rng, rows - rng, 1):
     for c in range(rng, cols - rng, 1):
-        find_edges(r, c)
+        find_spots(r, c)
 
 
 end = time.time()
 print(end - start)
 
-print('angles')
+
+DIR = {
+    'N': pi / 2,
+    'NE': pi / 4,
+    'E': 0,
+    'SE': - pi / 4,
+}
 
 
 def connect():
-    # edge = edges.pop()
-    # while len(edges):
-    # r, c = edge
-    r = 32
-    c = 54
+    neighbors = Queue(len(spots))
+    neighbors.put(spots.pop())
+    edges = defaultdict(Edge)
 
-    sum_angle = 0
-    neighbors = []
-    for r_off in range(-1, 2):
-        for c_off in range(-1, 2):
-            neighbor = (r + r_off, c + c_off)
-            if neighbor in edges:
-                neighbors.append(neighbor)
-                sum_angle += pi / 2 if not c_off else atan(r_off / c_off)
+    while neighbors.qsize():
+        r, c = neighbors.get()
+        current_edge = edges[(r, c)]
+        old_neighbors_size = neighbors.qsize()
+        sum_angle = 0
 
-    print(180 * sum_angle / pi / len(neighbors))
+        sum_angle += follow_neighbor(neighbors, (r - 1, c - 1), DIR['SE'])
+        sum_angle += follow_neighbor(neighbors, (r - 1, c), DIR['N'])
+        sum_angle += follow_neighbor(neighbors, (r - 1, c + 1), DIR['NE'])
 
-    # return shape
+        sum_angle += follow_neighbor(neighbors, r, c - 1, DIR['E'])
+        sum_angle += follow_neighbor(neighbors, r, c + 1, DIR['E'])
+
+        sum_angle += follow_neighbor(neighbors, (r + 1, c - 1), DIR['NE'])
+        sum_angle += follow_neighbor(neighbors, (r + 1, c), DIR['N'])
+        sum_angle += follow_neighbor(neighbors, (r + 1, c + 1), DIR['SE'])
+
+        net_direction = sum_angle / (neighbors.qsize() - old_neighbors_size)
+
+        if current_edge.is_oriented_along(net_direction):
+            current_edge.absorb(r, c)
 
 
-connect()
-# start = time.time()
-# print('processing', len(edges))
-# i = 0
-# while len(edges):
-#     shape = connect(Shape(), *next(iter(edges)))
-#     if shape.area() > 10:
-#         imsave('/Users/tru/Desktop/slices/try{}.jpg'.format(i),
-#                original[shape.index_tuple()])
-#         i += 1
-# end = time.time()
-# print(end - start)
+def follow_neighbor(neighbors, neighbor, direction):
+    if neighbor in spots:
+        spots.discard(neighbor)
+        neighbors.put(neighbor)
+        return direction
+
+    return 0
+
+    # start = time.time()
+    # print('processing', len(spots))
+    # i = 0
+    # while len(spots):
+    #     shape = connect(Shape(), *next(iter(spots)))
+    #     if shape.area() > 10:
+    #         imsave('/Users/tru/Desktop/slices/try{}.jpg'.format(i),
+    #                original[shape.index_tuple()])
+    #         i += 1
+    # end = time.time()
+    # print(end - start)
 
 
 imsave('/Users/tru/Desktop/out{}.jpg'.format(color), out)
