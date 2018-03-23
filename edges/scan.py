@@ -1,6 +1,6 @@
 from scipy.misc import imread, imsave
 from collections import defaultdict
-from shape import Shape
+from edge import EdgeBox
 from queue import Queue
 from math import pi, atan
 
@@ -32,6 +32,8 @@ rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
 spots = set()
 
+edges = defaultdict(EdgeBox)
+angle_bins = np.linspace(pi / 2, -pi / 2, 3)
 print('loaded')
 
 
@@ -47,78 +49,69 @@ def find_spots(r, c):
 def detect(color, r, c):
     if image[r, c] != color:
         spots.add((r, c))
-        out[r, c] = [255, 255, 255]
+        # out[r, c] = [255, 255, 255]
 
 
-rng = 1
+def connect(spot):
+    spot_connector = Queue(len(spots))
+    spot_connector.put(spot)
+    receptive_field = (-2, 3)
 
-print('seeing')
+    while spot_connector.qsize():
+        spot = spot_connector.get()
+        current_edge = edges[spot]
+
+        angle = 0
+        new_neighbors = []
+        for r in range(*receptive_field):
+            for c in range(*receptive_field):
+                current_row, current_col = spot
+                neighbor = (r + current_row, c + current_col)
+
+                if neighbor in spots:
+                    spots.discard(neighbor)
+                    new_neighbors.append(neighbor)
+                    spot_connector.put(neighbor)
+                    angle += get_angle(r, c)
+
+        if len(new_neighbors):
+            angle = np.digitize(angle / len(new_neighbors), angle_bins)
+            if current_edge.is_oriented_along(angle):
+                for neighbor in new_neighbors:
+                    current_edge.absorb(*neighbor)
+                    edges[neighbor] = current_edge
+
+
+def get_angle(r, c):
+    sign = 1 if r >= 0 else -1
+    return sign * pi / 2 if not c else atan(r / c)
+
+
+print('spotting')
 start = time.time()
 
-for r in range(rng, rows - rng, 1):
-    for c in range(rng, cols - rng, 1):
+for r in range(1, rows - 1):
+    for c in range(1, cols - 1):
         find_spots(r, c)
-
 
 end = time.time()
 print(end - start)
+print(len(spots))
+
+print('edging')
+start = time.time()
+
+while len(spots):
+    connect(spots.pop())
+
+end = time.time()
+print(end - start)
+print(len(set(edges.values())))
+
+for edge in set(edges.values()):
+    color = np.random.randint(0, 256, (3))
+    for spot in edge.spots:
+        out[spot] = color
 
 
-DIR = {
-    'N': pi / 2,
-    'NE': pi / 4,
-    'E': 0,
-    'SE': - pi / 4,
-}
-
-
-def connect():
-    neighbors = Queue(len(spots))
-    neighbors.put(spots.pop())
-    edges = defaultdict(Edge)
-
-    while neighbors.qsize():
-        r, c = neighbors.get()
-        current_edge = edges[(r, c)]
-        old_neighbors_size = neighbors.qsize()
-        sum_angle = 0
-
-        sum_angle += follow_neighbor(neighbors, (r - 1, c - 1), DIR['SE'])
-        sum_angle += follow_neighbor(neighbors, (r - 1, c), DIR['N'])
-        sum_angle += follow_neighbor(neighbors, (r - 1, c + 1), DIR['NE'])
-
-        sum_angle += follow_neighbor(neighbors, r, c - 1, DIR['E'])
-        sum_angle += follow_neighbor(neighbors, r, c + 1, DIR['E'])
-
-        sum_angle += follow_neighbor(neighbors, (r + 1, c - 1), DIR['NE'])
-        sum_angle += follow_neighbor(neighbors, (r + 1, c), DIR['N'])
-        sum_angle += follow_neighbor(neighbors, (r + 1, c + 1), DIR['SE'])
-
-        net_direction = sum_angle / (neighbors.qsize() - old_neighbors_size)
-
-        if current_edge.is_oriented_along(net_direction):
-            current_edge.absorb(r, c)
-
-
-def follow_neighbor(neighbors, neighbor, direction):
-    if neighbor in spots:
-        spots.discard(neighbor)
-        neighbors.put(neighbor)
-        return direction
-
-    return 0
-
-    # start = time.time()
-    # print('processing', len(spots))
-    # i = 0
-    # while len(spots):
-    #     shape = connect(Shape(), *next(iter(spots)))
-    #     if shape.area() > 10:
-    #         imsave('/Users/tru/Desktop/slices/try{}.jpg'.format(i),
-    #                original[shape.index_tuple()])
-    #         i += 1
-    # end = time.time()
-    # print(end - start)
-
-
-imsave('/Users/tru/Desktop/out{}.jpg'.format(color), out)
+imsave('/Users/tru/Desktop/out23.jpg', out)
