@@ -1,10 +1,9 @@
 from scipy.misc import imread, imsave
 from collections import defaultdict
 from edge import EdgeBox
-from queue import Queue
 from math import pi, atan
+from colors import binitize
 
-import pandas as pd
 import numpy as np
 import pickle
 import time
@@ -18,73 +17,51 @@ shutil.rmtree("/Users/tru/Desktop/slices/")
 os.makedirs("/Users/tru/Desktop/slices/")
 
 
-module, img_name, bins = sys.argv
+module, img_name = sys.argv
 
-print('loading bins')
-color = int(bins) if bins else 2
-bins = np.array(pd.read_csv(
-    '/Users/tru/Workspace/surrep/recognition/data/colorBins{}.txt'.format(color), header=None)[0])
-identifier = [256 ** 2, 256 ** 1, 256 ** 0]
+print('loading image')
 
-original = imread('/Users/tru/Desktop/photos/' + img_name)
-image = bins[original.dot(identifier)]
+image = binitize(imread('/Users/tru/Desktop/photos/{}.jpg'.format(img_name)))
 rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
-spots = set()
 
+spots = set()
 edges = defaultdict(EdgeBox)
-angle_bins = np.linspace(pi / 2, -pi / 2, 3)
+
+# setup for edge connection
+angle_bins = np.linspace(pi / 2, -pi / 2, 12)
+rows, cols = np.meshgrid(receptive_field, receptive_field)
+angles = np.arctan(cols / rows)
+
 print('loaded')
 
 
 def find_spots(r, c):
+    receptive_field = range(-1, 2)  # 3x3
     color = image[r, c]
 
-    detect(color, r - 1, c)
-    detect(color, r, c - 1)
-    detect(color, r, c + 1)
-    detect(color, r + 1, c)
+    for r_off in receptive_field:
+        for c_off in receptive_field:
+            detect(color, r + r_off, c + c_off)
 
 
 def detect(color, r, c):
     if image[r, c] != color:
         spots.add((r, c))
-        # out[r, c] = [255, 255, 255]
+        out[r, c] = [255, 255, 255]
 
 
 def connect(spot):
-    spot_connector = Queue(len(spots))
-    spot_connector.put(spot)
-    receptive_field = (-2, 3)
+    r, c = spot
 
-    while spot_connector.qsize():
-        spot = spot_connector.get()
-        current_edge = edges[spot]
+    receptive_field = np.arange(-3, 4)  # 7x7
+    field = image[r + receptive_field, c + receptive_field]
 
-        angle = 0
-        new_neighbors = []
-        for r in range(*receptive_field):
-            for c in range(*receptive_field):
-                current_row, current_col = spot
-                neighbor = (r + current_row, c + current_col)
-
-                if neighbor in spots:
-                    spots.discard(neighbor)
-                    new_neighbors.append(neighbor)
-                    spot_connector.put(neighbor)
-                    angle += get_angle(r, c)
-
-        if len(new_neighbors):
-            angle = np.digitize(angle / len(new_neighbors), angle_bins)
-            if current_edge.is_oriented_along(angle):
-                for neighbor in new_neighbors:
-                    current_edge.absorb(*neighbor)
-                    edges[neighbor] = current_edge
+    np.digitize(angles[field > 0], angle_bins)
 
 
 def get_angle(r, c):
-    sign = 1 if r >= 0 else -1
-    return sign * pi / 2 if not c else atan(r / c)
+    return pi / 2 if not c else atan(r / c)
 
 
 print('spotting')
@@ -98,20 +75,20 @@ end = time.time()
 print(end - start)
 print(len(spots))
 
-print('edging')
-start = time.time()
+# print('edging')
+# start = time.time()
 
-while len(spots):
-    connect(spots.pop())
+# while len(spots):
+#     connect(spots.pop())
 
-end = time.time()
-print(end - start)
-print(len(set(edges.values())))
+# end = time.time()
+# print(end - start)
+# print(len(set(edges.values())))
 
-for edge in set(edges.values()):
-    color = np.random.randint(0, 256, (3))
-    for spot in edge.spots:
-        out[spot] = color
+# for edge in set(edges.values()):
+#     color = np.random.randint(0, 256, (3))
+#     for spot in edge.spots:
+#         out[spot] = color
 
 
-imsave('/Users/tru/Desktop/out23.jpg', out)
+imsave('/Users/tru/Desktop/out22.jpg', out)
