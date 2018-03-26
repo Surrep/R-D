@@ -16,7 +16,7 @@ function mod(n, m) {
 
 function digitize(num, markers) {
     markers = markers.sort()
-    
+
     for (let i = 1; i < markers.length; i++) {
         const m1 = markers[i - 1]
         const m2 = markers[i]
@@ -32,9 +32,42 @@ function linspace(start, end, steps) {
     const arr = []
     const step = (end - start) / (steps - 1)
 
-    for (let n = start; Math.round(n) !== end; n += step)
+    for (let n = start; n.toFixed(5) !== end.toFixed(5); n += step)
         arr.push(n)
 
     arr.push(end)
     return arr
+}
+
+function drawBox(table, r, c, bound) {
+    const cells = []
+    for (let off = -bound; off < bound; off++) {
+
+        const topCell = table.getCell(table.getCellID(r - bound, c + off))
+        const botCell = table.getCell(table.getCellID(r + bound, c + off))
+        const lefCell = table.getCell(table.getCellID(r + off, c - bound))
+        const rigCell = table.getCell(table.getCellID(r + off, c + bound))
+
+        cells.push(
+            [topCell, topCell.style.backgroundColor.slice()],
+            [botCell, botCell.style.backgroundColor.slice()],
+            [lefCell, lefCell.style.backgroundColor.slice()],
+            [rigCell, rigCell.style.backgroundColor.slice()]
+        )
+
+        topCell.style.backgroundColor = 'Orange'
+        botCell.style.backgroundColor = 'Orange'
+        lefCell.style.backgroundColor = 'Orange'
+        rigCell.style.backgroundColor = 'Orange'
+    }
+
+    
+    return cells
+}
+
+function eraseCells(cells) {
+    cells.forEach(function (cellInfo) {
+        const [cell, color] = cellInfo
+        cell.style.backgroundColor = color
+    })
 }

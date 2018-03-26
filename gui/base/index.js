@@ -6,8 +6,9 @@ rawFile = new XMLHttpRequest()
 rawFile.open("GET", "a.txt", false)
 
 angle_bin_count = 12
-angles = linspace(Math.PI, 0, angle_bin_count)
+angles = linspace(0, Math.PI, angle_bin_count)
 colors = getColorPallete(angle_bin_count + 1)
+recepSize = 4
 
 rawFile.onreadystatechange = async function () {
     data = rawFile.responseText.split('\n')
@@ -20,8 +21,9 @@ rawFile.onreadystatechange = async function () {
         let angle = 0
         let spotCount = 0
         const cells = []
-        for (let rOff = -3; rOff <= 3; rOff++) {
-            for (let cOff = -3; cOff <= 3; cOff++) {
+
+        for (let rOff = -recepSize; rOff <= recepSize; rOff++) {
+            for (let cOff = -recepSize; cOff <= recepSize; cOff++) {
                 const newSpot = table.getCellID(r + rOff, c + cOff)
                 const cell = table.getCell(newSpot)
 
@@ -36,12 +38,16 @@ rawFile.onreadystatechange = async function () {
 
         if (spotCount) {
             const finalAngle = digitize(angle / spotCount, angles)
-            console.log(angle / spotCount)
-            await new Promise(resolve => setTimeout(resolve, 10));
+
+
+            const outline = drawBox(table, r, c, recepSize + 1)
 
             for (const cell of cells) {
                 cell.style.backgroundColor = colors[finalAngle]
+                await new Promise(resolve => setTimeout(resolve, 10));
             }
+
+            eraseCells(outline)
         }
 
     }
