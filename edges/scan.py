@@ -1,7 +1,6 @@
 from scipy.misc import imread, imsave
-from collections import defaultdict
 from edge import EdgeBox
-from math import pi, atan
+from math import pi, atan, floor
 from colors import binitize, random_color
 
 import numpy as np
@@ -26,7 +25,10 @@ rows, cols = image.shape
 out = np.zeros((rows, cols, 3))
 
 spots = set()
-edges = defaultdict(list)
+edges = dict()
+
+angle_bin_count = 256
+angle_bins = np.linspace(pi / 2, -pi / 2, angle_bin_count)
 
 print('loaded')
 
@@ -46,20 +48,23 @@ def find_spots():
 
 
 def find_edges():
-    receptive_field = np.arange(-3, 4)  # 7x7
+    receptive_field = np.arange(-3, 4)
     angle_rows, angle_cols = np.meshgrid(receptive_field, receptive_field)
-    angles = np.arctan(angle_cols / angle_rows)
-    angle_bins = np.linspace(1.5, -1.5, 12)
+    angles = np.arctan2(angle_cols, angle_rows)
 
     while len(spots):
         r, c = spots.pop()
-        field = image[r - 3:r + 4, c - 3: c + 4]
-        recep_rows, recep_cols = field.nonzero()
-        votes = np.digitize(angles[field > 0], angle_bins) % 12
+        field = image[np.ix_(r + receptive_field, c + receptive_field)]
 
-        for i, spot in enumerate(zip(recep_rows, recep_cols)):
-            r_off, c_off = spot
-            edges[(r + r_off, c + c_off)].append(votes[i])
+        edge_pixels = (field == 0).nonzero()
+        angle = np.digitize(angles[edge_pixels].mean(), angle_bins)
+
+        for (r_off, c_off) in zip(*edge_pixels):
+            spot = (r + r_off, c + c_off)
+            spots.discard(spot)
+
+            if spot not in edges:
+                edges[spot] = angle
 
 
 print('--------spotting----------')
@@ -75,10 +80,10 @@ find_edges()
 end = time.time()
 print(end - start)
 
-colors = [random_color() for i in range(12)]
+color_pallete = [random_color() for i in range(angle_bin_count + 1)]
 
 for spot in edges:
-    out[spot] = colors[np.argmax(np.bincount(edges[spot]))]
+    out[spot] = color_pallete[edges[spot]]
 
 
-imsave('/Users/tru/Desktop/out22.jpg', out)
+imsave('/Users/tru/Desktop/out.jpg', out)
