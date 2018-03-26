@@ -25,10 +25,7 @@ rawFile.onreadystatechange = function () {
             }
         }
 
-        const finalAngle = 
-
-
-
+        const finalAngle = digitize()
     })
 }
 

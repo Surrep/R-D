@@ -20,3 +20,14 @@ function digitize(num, markers) {
 
     return markers.length
 }
+
+function linspace(start, end, steps) {
+    const arr = []
+    const step = (end - start) / (steps - 1)
+
+    for (let n = start; Math.round(n) !== end; n += step)
+        arr.push(n)
+
+    arr.push(end)
+    return arr
+}
