@@ -6,7 +6,7 @@ import sys
 
 module, img_name = sys.argv
 
-bins = 2
+bins = 8
 image = binitize(imread('/Users/tru/Desktop/photos/{}.jpg'.format(img_name)))
 out = np.zeros((*image.shape, 3))
 

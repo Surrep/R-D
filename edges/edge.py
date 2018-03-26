@@ -10,14 +10,12 @@ class EdgeBox():
         self.orientation = None
         self.spots = []
 
-    def is_oriented_along(self, orientation):
-        if not self.orientation:
-            self.orientation = orientation
+    def merge(self, other_edge, angle):
+        other_edge.orientation = angle
 
-        return self.orientation == orientation
-
-    def absorb(self, r, c):
+    def absorb(self, r, c, angle):
         self.spots.append((r, c))
+        self.orientation = angle
 
         if(self.topmost_row == None or r < self.topmost_row):
             self.topmost_row = r
