@@ -10,12 +10,8 @@ class EdgeBox():
         self.orientation = None
         self.spots = []
 
-    def merge(self, other_edge, angle):
-        other_edge.orientation = angle
-
-    def absorb(self, r, c, angle):
+    def absorb(self, r, c):
         self.spots.append((r, c))
-        self.orientation = angle
 
         if(self.topmost_row == None or r < self.topmost_row):
             self.topmost_row = r
