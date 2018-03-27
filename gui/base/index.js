@@ -3,12 +3,13 @@
 let table, data, rawFile
 
 rawFile = new XMLHttpRequest()
-rawFile.open("GET", "a.txt", false)
+rawFile.open("GET", "arr.txt", false)
 
-angle_bin_count = 12
-angles = linspace(0, Math.PI, angle_bin_count)
-colors = getColorPallete(angle_bin_count + 1)
-recepSize = 4
+const angle_bin_count = 8
+const angles = linspace(0, Math.PI, angle_bin_count)
+const colors = getColorPallete(angle_bin_count + 1)
+const recepSize = 2
+const history = {}
 
 rawFile.onreadystatechange = async function () {
     data = rawFile.responseText.split('\n')
@@ -38,23 +39,20 @@ rawFile.onreadystatechange = async function () {
 
         if (spotCount) {
             const finalAngle = digitize(angle / spotCount, angles)
-
-
             const outline = drawBox(table, r, c, recepSize + 1)
 
             for (const cell of cells) {
-                cell.style.backgroundColor = colors[finalAngle]
-                await new Promise(resolve => setTimeout(resolve, 10));
+                history[cell.id] = history[cell.id] || []
+                history[cell.id].push(finalAngle)
+
+                cell.style.backgroundColor = colors[mode(history[cell.id])]
+                await new Promise(resolve => setTimeout(resolve));
             }
 
             eraseCells(outline)
         }
 
     }
-
-
-
-
 }
 
 rawFile.send(null);

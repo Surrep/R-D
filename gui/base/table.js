@@ -6,8 +6,12 @@ class Table {
         this.data = data
         this.spots = new Set()
 
-        this.table = document.createElement("table");
+        this.table = document.createElement("table")
         document.body.appendChild(this.table)
+
+        this.legend = document.createElement("h1")
+        this.legend.style.fontSize = '140px'
+        document.body.appendChild(this.legend)
 
         this.sync()
     }
@@ -16,10 +20,14 @@ class Table {
         for (let r = 0; r < this.rows; r++) {
             const currentRow = this.table.insertRow()
             for (let c = 0; c < this.cols; c++) {
-                
+
                 const cell = document.createElement('td')
                 cell.id = this.getCellID(r, c)
                 cell.style.backgroundColor = Number(this.data[cell.id]) ? 'white' : 'black'
+                cell.addEventListener('mousedown', (function (event) {
+                    this.legend.innerText =
+                        `${this.getRowAndColFromID(event.target.id)}:${event.target.id}`
+                }).bind(this))
 
                 if (Number(this.data[cell.id]))
                     this.spots.add(cell.id)

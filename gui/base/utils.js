@@ -61,7 +61,7 @@ function drawBox(table, r, c, bound) {
         rigCell.style.backgroundColor = 'Orange'
     }
 
-    
+
     return cells
 }
 
@@ -70,4 +70,27 @@ function eraseCells(cells) {
         const [cell, color] = cellInfo
         cell.style.backgroundColor = color
     })
+}
+
+function mode(array) {
+    let mostNumerous = 0
+    const occurences = {}
+
+    for (const element of array) {
+        occurences[element] = occurences[element] || 0
+        occurences[element]++
+
+        if (occurences[element] > mostNumerous)
+            mostNumerous = element
+    }
+
+    return mostNumerous
+}
+
+function floorMean(array) {
+    return Math.floor(
+        array.reduce(function (sum, element) {
+            return sum + element
+        }) / array.length
+    )
 }
