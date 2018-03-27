@@ -10,12 +10,6 @@ class EdgeBox():
         self.orientation = None
         self.spots = []
 
-    def is_oriented_along(self, orientation):
-        if not self.orientation:
-            self.orientation = orientation
-
-        return self.orientation == orientation
-
     def absorb(self, r, c):
         self.spots.append((r, c))
 
