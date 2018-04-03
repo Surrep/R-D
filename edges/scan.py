@@ -17,26 +17,30 @@ shutil.rmtree("/Users/tru/Desktop/slices/")
 os.makedirs("/Users/tru/Desktop/slices/")
 
 
-module, img_name = sys.argv
+args = sys.argv
 
-print('loading image')
-image_path = '/Users/tru/Desktop/photos/{}.jpg'.format(img_name)
+# print('loading image')
+# image_path = '/Users/tru/Desktop/photos/{}.jpg'.format(img_name)
 
-image = binitize(imread(image_path))
-rows, cols = image.shape
-out = np.zeros((rows, cols, 3))
-
-spots = set()
-edges = defaultdict(EdgeBox)
-
-angle_bin_count = 6
-angle_bins = np.linspace(pi, 0, angle_bin_count)
-
-print('loaded')
+# image = binitize(imread(image_path))
+# rows, cols = image.shape
 
 
-def find_spots():
+# edges = defaultdict(EdgeBox)
+
+# angle_bin_count = 6
+# angle_bins = np.linspace(pi, 0, angle_bin_count)
+
+# print('loaded')
+
+
+def find_spots(image):
+    out = np.zeros_like(image)
+    rows, cols, channels = image.shape
     receptive_field = range(-1, 2)  # 3x3
+
+    image = binitize(image)
+    spots = set()
 
     for r in range(2, rows - 2):
         for c in range(2, cols - 2):
@@ -47,6 +51,7 @@ def find_spots():
                     if image[r + r_off, c + c_off] != color:
                         spots.add((r, c))
                         out[r, c] = [255, 255, 255]
+    return out
 
 
 def find_edges():
@@ -71,23 +76,21 @@ def find_edges():
 
 print('--------spotting----------')
 start = time.time()
-find_spots()
+out = find_spots(imread('/Users/tru/Desktop/photos/four.jpg'))
 end = time.time()
 print(end - start)
-print(len(spots))
 
-print('--------edging-----------')
-start = time.time()
-find_edges()
-end = time.time()
-print(end - start)
-print(len(set(edges.values())))
+imsave('/Users/tru/Desktop/outfour.jpg', out)
 
-color_pallete = [random_color() for i in range(angle_bin_count + 1)]
+# print('--------edging-----------')
+# start = time.time()
+# find_edges()
+# end = time.time()
+# print(end - start)
+# print(len(set(edges.values())))
 
-for spot in edges:
-    if edges[spot].orientation:
-        out[spot] = color_pallete[edges[spot].orientation]
+# color_pallete = [random_color() for i in range(angle_bin_count + 1)]
 
-
-imsave('/Users/tru/Desktop/out24.jpg', out)
+# for spot in edges:
+#     if edges[spot].orientation:
+#         out[spot] = color_pallete[edges[spot].orientation]

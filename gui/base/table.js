@@ -5,6 +5,7 @@ class Table {
         this.cols = cols
         this.data = data
         this.spots = new Set()
+        this.cells = Array()
 
         this.table = document.createElement("table")
         document.body.appendChild(this.table)
@@ -24,10 +25,7 @@ class Table {
                 const cell = document.createElement('td')
                 cell.id = this.getCellID(r, c)
                 cell.style.backgroundColor = Number(this.data[cell.id]) ? 'white' : 'black'
-                cell.addEventListener('mousedown', (function (event) {
-                    this.legend.innerText =
-                        `${this.getRowAndColFromID(event.target.id)}:${event.target.id}`
-                }).bind(this))
+                this.cells.push(cell)
 
                 if (Number(this.data[cell.id]))
                     this.spots.add(cell.id)

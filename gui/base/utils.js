@@ -48,17 +48,19 @@ function drawBox(table, r, c, bound) {
         const lefCell = table.getCell(table.getCellID(r + off, c - bound))
         const rigCell = table.getCell(table.getCellID(r + off, c + bound))
 
-        cells.push(
-            [topCell, topCell.style.backgroundColor.slice()],
-            [botCell, botCell.style.backgroundColor.slice()],
-            [lefCell, lefCell.style.backgroundColor.slice()],
-            [rigCell, rigCell.style.backgroundColor.slice()]
-        )
+        if (topCell && botCell && lefCell && rigCell) {
+            cells.push(
+                [topCell, topCell.style.backgroundColor.slice()],
+                [botCell, botCell.style.backgroundColor.slice()],
+                [lefCell, lefCell.style.backgroundColor.slice()],
+                [rigCell, rigCell.style.backgroundColor.slice()]
+            )
 
-        topCell.style.backgroundColor = 'Orange'
-        botCell.style.backgroundColor = 'Orange'
-        lefCell.style.backgroundColor = 'Orange'
-        rigCell.style.backgroundColor = 'Orange'
+            topCell.style.backgroundColor = 'Orange'
+            botCell.style.backgroundColor = 'Orange'
+            lefCell.style.backgroundColor = 'Orange'
+            rigCell.style.backgroundColor = 'Orange'
+        }
     }
 
 
@@ -93,4 +95,43 @@ function floorMean(array) {
             return sum + element
         }) / array.length
     )
+}
+
+
+async function drawBoxAndComputeAngle(cell, table, history, angles, recepSize) {
+    table.legend.innerText =
+        `${table.getRowAndColFromID(cell.id)}:${cell.id}`
+
+    const [row, col] = table.getRowAndColFromID(cell.id)
+    let angle = 0
+    let spotCount = 0
+
+    const outline = drawBox(table, row, col, recepSize + 1)
+
+    for (let rOff = -recepSize; rOff <= recepSize; rOff++) {
+        let rowStr = ''
+        for (let cOff = -recepSize; cOff <= recepSize; cOff++) {
+            const newSpot = table.getCellID(row + rOff, col + cOff)
+            const cell = table.getCell(newSpot)
+            let spotAngle = '-----'
+
+            if (cell && Number(table.data[cell.id])) {
+                angle += spotAngle = Math.pow(mod(Math.atan2(cOff, rOff), Math.PI), 2)
+                spotAngle = spotAngle.toFixed(3)
+                spotCount++
+            }
+            rowStr += `[${spotAngle}]`
+        }
+        console.log(rowStr)
+    }
+
+    if (spotCount) {
+        const finalAngle = digitize(angle / spotCount, angles)
+        console.log('finalAngle', (angle / spotCount).toFixed(4), finalAngle)
+    }
+
+    console.log(mode(history[cell.id]))
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    eraseCells(outline)
+
 }

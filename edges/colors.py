@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-bin_path = '/Users/tru/Workspace/surrep/recognition/data/colorBins{}.txt'
+bin_path = '/Users/tru/Workspace/surrep/production/data/colorBins{}.txt'
 identifier = [256 ** 2, 256 ** 1, 256 ** 0]
 
 

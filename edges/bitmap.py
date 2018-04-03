@@ -3,14 +3,15 @@ import pandas as pd
 import os
 
 from scipy.misc import imread
+from scan import find_spots
 
 identifier = [256 ** 2, 256 ** 1, 256 ** 0]
 bins = np.array(pd.read_csv(
-    '/Users/tru/Workspace/surrep/recognition/data/colorBins2.txt', header=None)[0])
+    '/Users/tru/Workspace/surrep/production/data/colorBins2.txt', header=None)[0])
 
 
 def write_map(path):
-    f = imread(path)
+    f = find_spots(imread(path))
 
     name, ext = os.path.splitext(os.path.basename(path))
     write_path = '/Users/tru/Desktop/texts/{}.txt'.format(name)
