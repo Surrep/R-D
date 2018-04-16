@@ -3,7 +3,7 @@ import numpy as np
 
 photo_repo = '/Users/tru/Desktop/photos/'
 
-photo = imread(photo_repo + 'drt.jpg')
+photo = imread(photo_repo + 'shu.jpg')
 rows, cols, channels = photo.shape
 
 maps = 1
@@ -13,7 +13,7 @@ receptive_field = np.arange(-2, 3)
 out = np.zeros((rows, cols, maps))
 
 margin = 5
-stride = 2
+stride = 1
 
 for r in range(margin, rows - margin, stride):
     for c in range(margin, cols - margin, stride):
@@ -23,4 +23,4 @@ for r in range(margin, rows - margin, stride):
             out[r, c, i] = activation
 
 for filt in range(maps):
-    imsave('/Users/tru/Desktop/out{}.jpg'.format(filt), out[:, :, filt])
+    imsave('/Users/tru/Desktop/out2.jpg'.format(filt), out[:, :, filt])
