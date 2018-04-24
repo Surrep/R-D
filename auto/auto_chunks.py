@@ -1,4 +1,5 @@
 from scipy.io.wavfile import read, write
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -9,51 +10,56 @@ def load_sound(path):
     return sample_rate, (data / np.max(data)).reshape(1, -1)
 
 
-def forward_layer(prev, weights):
-    return prev.dot(weights)
+class AutoRNN:
 
+    def __init__(self, learning_rate, sequence_len):
+        self.learning_rate = learning_rate
+        self.sequence_len = sequence_len
+        self.W1 = np.random.randn(sequence_len, sequence_len)
 
-def compute_cost(yhat, y):
-    return ((yhat - y) ** 2 / 2).sum()
+    def predict(self, X):
+        out = np.zeros_like(X)
 
-
-def get_samples(data, t, sequence_len):
-    samples = data[:, t:t + sequence_len]
-    if len(samples[0]) is not sequence_len:
-        return None
-
-    return samples
-
-
-def fit(X, sequence_len, W1, learning_rate, verbose=False):
-    for t in range(len(X[0])):
-        cost = 2  # inf
-
-        if verbose:
-            print('-----------------------------------', t)
-
-        while cost > 1e-1:
-            xt = get_samples(X, t, sequence_len)
+        for t in range(len(X[0])):
+            xt = self.get_samples(t)
             if xt is None:
                 break
-            zt = forward_layer(xt, W1)
-            cost = compute_cost(zt, xt)
+            zt = xt.dot(self.W1)
+            out[:, t:t + sequence_len] = zt
+            print(zt, 'zt')
+            print(xt, 'xt')
+
+        return out
+
+    def get_samples(self, t, X):
+        samples = X[:, t:t + self.sequence_len]
+        return None if len(samples[0]) < self.sequence_len else return samples
+
+    def compute_cost(self, yhat, y):
+        return ((yhat - y) ** 2 / 2).sum()
+
+    def fit(self, X, verbose=False):
+        errors = []
+        for t in range(len(X[0])):
+            cost = 2  # inf
 
             if verbose:
-                print(cost)
+                print('-----------------------------------', t)
 
-            dy = zt - xt
-            dW1 = xt.T.dot(dy)
-            W1 -= learning_rate * dW1
+            while cost > 1e-1:
+                xt = self.get_samples(t, X)
+                if xt is None:
+                    break
+                zt = xt.dot(W1)
+                cost = compute_cost(zt, xt)
+                errors.append(cost)
 
+                if verbose:
+                    print(cost)
 
-sounds = '/Users/tru/Desktop/english/'
-sample_rate1, data1 = load_sound(sounds + 'tru1.wav')
+                dy = zt - xt
+                dW1 = xt.T.dot(dy)
+                W1 -= learning_rate * dW1
 
-sequence_len = 10
-learning_rate = 1e-1
+        return np.array(errors)
 
-X = data1
-W1 = np.random.randn(sequence_len, sequence_len)
-
-fit(X, sequence_len, W1, learning_rate, verbose=False)
