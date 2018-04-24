@@ -21,19 +21,17 @@ class AutoRNN:
         out = np.zeros_like(X)
 
         for t in range(len(X[0])):
-            xt = self.get_samples(t)
+            xt = self.get_samples(X, t)
             if xt is None:
                 break
             zt = xt.dot(self.W1)
-            out[:, t:t + sequence_len] = zt
-            print(zt, 'zt')
-            print(xt, 'xt')
+            out[:, t:t + self.sequence_len] = zt
 
         return out
 
-    def get_samples(self, t, X):
+    def get_samples(self, X, t):
         samples = X[:, t:t + self.sequence_len]
-        return None if len(samples[0]) < self.sequence_len else return samples
+        return None if len(samples[0]) < self.sequence_len else samples
 
     def compute_cost(self, yhat, y):
         return ((yhat - y) ** 2 / 2).sum()
@@ -47,7 +45,7 @@ class AutoRNN:
                 print('-----------------------------------', t)
 
             while cost > 1e-1:
-                xt = self.get_samples(t, X)
+                xt = self.get_samples(X, t)
                 if xt is None:
                     break
                 zt = xt.dot(W1)
@@ -62,4 +60,3 @@ class AutoRNN:
                 W1 -= learning_rate * dW1
 
         return np.array(errors)
-
