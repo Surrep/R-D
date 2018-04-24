@@ -1,16 +1,12 @@
 from scipy.io.wavfile import read, write
 import numpy as np
 
-sounds = '/Users/tru/Desktop/english/'
-sample_rate, data = read(sounds + 'four.wav')
 
+def load_sound(path):
+    sample_rate, data = read(path)
+    data = data[:, 0].T
 
-sequence_len = 10
-learning_rate = 1e-1
-samples = 30
-
-X = np.sin(880 * np.arange(samples)).reshape(1, -1)
-W1 = np.random.randn(sequence_len, sequence_len)
+    return sample_rate, (data / np.max(data)).reshape(1, -1)
 
 
 def forward_layer(prev, weights):
@@ -36,7 +32,7 @@ def fit(X, sequence_len, W1, learning_rate, verbose=False):
         if verbose:
             print('-----------------------------------', t)
 
-        while cost > 1e-5:
+        while cost > 1e-1:
             xt = get_samples(X, t, sequence_len)
             if xt is None:
                 break
@@ -51,5 +47,13 @@ def fit(X, sequence_len, W1, learning_rate, verbose=False):
             W1 -= learning_rate * dW1
 
 
-fit(X, sequence_len, W1, learning_rate, verbose=True)
+sounds = '/Users/tru/Desktop/english/'
+sample_rate1, data1 = load_sound(sounds + 'tru1.wav')
 
+sequence_len = 10
+learning_rate = 1e-1
+
+X = data1
+W1 = np.random.randn(sequence_len, sequence_len)
+
+fit(X, sequence_len, W1, learning_rate, verbose=False)
