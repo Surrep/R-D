@@ -4,13 +4,13 @@ import numpy as np
 sounds = '/Users/tru/Desktop/english/'
 sample_rate, data = read(sounds + 'four.wav')
 
-print(sample_rate, data.shape)
 
 sequence_len = 10
 learning_rate = 1e-1
+samples = 30
 
-X = np.sin(880 * np.arange(2000)).reshape(1, -1)
-WI = np.random.randn(sequence_len, sequence_len)
+X = np.sin(880 * np.arange(samples)).reshape(1, -1)
+W1 = np.random.randn(sequence_len, sequence_len)
 
 
 def forward_layer(prev, weights):
@@ -23,23 +23,33 @@ def compute_cost(yhat, y):
 
 def get_samples(data, t, sequence_len):
     samples = data[:, t:t + sequence_len]
-    num_samples = len(samples[0])
-    padding = np.repeat(0, sequence_len - num_samples)
+    if len(samples[0]) is not sequence_len:
+        return None
 
-    return np.append(samples, padding).reshape(1, -1)
+    return samples
 
 
-for t in range(len(X[0])):
-    cost = 2  # inf
-    # print('-----------------------------------', t)
-    while cost > 1e-5:
-        xt = get_samples(X, t, sequence_len)
-        zt = forward_layer(xt, WI)
-        cost = compute_cost(zt, xt)
+def fit(X, sequence_len, W1, learning_rate, verbose=False):
+    for t in range(len(X[0])):
+        cost = 2  # inf
 
-        # print(cost)
+        if verbose:
+            print('-----------------------------------', t)
 
-        dy = zt - xt
-        dWI = xt.T.dot(dy)
-        WI -= learning_rate * dWI
+        while cost > 1e-5:
+            xt = get_samples(X, t, sequence_len)
+            if xt is None:
+                break
+            zt = forward_layer(xt, W1)
+            cost = compute_cost(zt, xt)
+
+            if verbose:
+                print(cost)
+
+            dy = zt - xt
+            dW1 = xt.T.dot(dy)
+            W1 -= learning_rate * dW1
+
+
+fit(X, sequence_len, W1, learning_rate, verbose=True)
 
