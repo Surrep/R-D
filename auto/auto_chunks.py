@@ -22,6 +22,15 @@ class AutoRNN:
     def compute_cost(self, yhat, y):
         return ((yhat - y) ** 2 / 2).sum()
 
+    def generate(self, seed, num_samples):
+        out = seed
+
+        for t in range(num_samples):
+            new_samples = out[:, t:t + self.seq_len].dot(self.W1)
+            out = np.append(out, new_samples).reshape(1, -1)
+
+        return out
+
     def update_sequence(self, seq, pred, target, t_step):
         """ 
         We define a binomial distribution to represent the 'lucidity' of the model.
@@ -80,4 +89,3 @@ class AutoRNN:
 
             if verbose and not t % 1e3:
                 print(t, count, cost)
-
