@@ -4,13 +4,6 @@ import numpy as np
 import math
 
 
-def load_sound(path):
-    sample_rate, data = read(path)
-    data = data[:, 0].T
-
-    return sample_rate, (data / np.max(data)).reshape(1, -1)
-
-
 class AutoRNN:
 
     def __init__(self, learning_rate, seq_len,
@@ -88,15 +81,3 @@ class AutoRNN:
             if verbose and not t % 1e3:
                 print(t, count, cost)
 
-
-sounds = '/Users/tru/Desktop/english/'
-sample_rate, data = read(sounds + 'calc.wav')
-
-X = (data.reshape(1, -1) / np.max(data))[:, 55000:57000]
-y = X
-
-
-arnn = AutoRNN(learning_rate=0.1, seq_len=25,
-               look_ahead=1, stride=1, lucidity=0)
-
-arnn.fit(X, y, epsilon=1e-13, cap=1000, verbose=True)
