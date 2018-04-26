@@ -13,8 +13,8 @@ def load_sound(path):
 
 class AutoRNN:
 
-    def __init__(self, learning_rate, seq_len, look_ahead,
-                 stride, lucidity):
+    def __init__(self, learning_rate, seq_len,
+                 look_ahead, stride, lucidity):
         self.lucidity = lucidity
         self.learning_rate = learning_rate
         self.seq_len = seq_len
@@ -28,6 +28,24 @@ class AutoRNN:
 
     def compute_cost(self, yhat, y):
         return ((yhat - y) ** 2 / 2).sum()
+
+    def update_sequence(self, seq, pred, target, t_step):
+        """ 
+        We define a binomial distribution to represent the 'lucidity' of the model.
+        This determines whether its own predictions shall be incorporated into future predictions (not lucid)
+        or whether ground truth sequence will be used to make future predictions (lucid) 
+
+        """
+
+        p_dist = [self.lucidity, 1 - self.lucidity]
+        choices = [False, True]  # false for target, true for self-generated
+        mask = np.random.choice(a=choices, size=pred.shape, p=p_dist)
+
+        t_cur = t_step + self.seq_len
+        t_end = t_cur + self.look_ahead
+        seq[:, t_cur:t_end] = np.where(mask, pred, target)
+
+        return seq
 
     def fit(self, X, y, epsilon=1e-5, cap=500, verbose=False):
         X = X.copy()  # copy data so as not to mutate original
@@ -64,14 +82,8 @@ class AutoRNN:
                 count += 1
                 attempts_exhausted = count > cap
 
-            p_dist = [self.lucidity, 1 - self.lucidity]
-            choices = [False, True]
-            mask = np.random.choice(a=choices, size=zt.shape, p=p_dist)
-
-            start = t + self.seq_len
-            end = start + self.look_ahead
-            if (end - start) == self.seq_len:
-                X[:, start:end] = np.where(mask, zt, xt)
+            # after the prediction is made (zt), we incorporate it into our signal
+            X = self.update_sequence(seq=X, pred=zt, target=yt, t_step=t)
 
             if verbose and not t % 1e3:
                 print(t, count, cost)
@@ -83,9 +95,8 @@ sample_rate, data = read(sounds + 'calc.wav')
 X = (data.reshape(1, -1) / np.max(data))[:, 55000:57000]
 y = X
 
-arnn = AutoRNN(learning_rate=0.1, seq_len=10,
-               look_ahead=10, stride=10, lucidity=0)
 
-errors = arnn.fit(X, y, epsilon=1e-13, cap=1000, verbose=True)
+arnn = AutoRNN(learning_rate=0.1, seq_len=25,
+               look_ahead=1, stride=1, lucidity=0)
 
-out2 = arnn.generate(X[:, :10], 1900)
+arnn.fit(X, y, epsilon=1e-13, cap=1000, verbose=True)
