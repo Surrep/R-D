@@ -24,9 +24,12 @@ class AutoRNN:
 
     def generate(self, seed, num_samples):
         out = seed
-
         for t in range(num_samples):
             new_samples = out[:, t:t + self.seq_len].dot(self.W1)
+            print(out[:, t:t + self.seq_len])
+            print(t + self.seq_len, '-', t + self.seq_len +
+                  self.look_ahead, new_samples)
+            print()
             out = np.append(out, new_samples).reshape(1, -1)
 
         return out
@@ -87,5 +90,22 @@ class AutoRNN:
             # after the prediction is made (zt), we incorporate it into our signal
             X = self.update_sequence(seq=X, pred=zt, target=yt, t_step=t)
 
-            if verbose and not t % 1e3:
-                print(t, count, cost)
+            if verbose:
+                print('xt', xt.round(4))
+                print('zt', zt.round(4))
+                print('yt', yt.round(4))
+                print('-----------------------------------------------------------------------------',
+                      t, count, cost)
+
+
+sounds = '/Users/tru/Desktop/english/'
+sample_rate, data = read(sounds + 'calc.wav')
+
+X = (data.reshape(1, -1) / np.max(data))[:, 42000:42100]
+y = X
+
+arnn = AutoRNN(learning_rate=0.1, seq_len=5,
+               look_ahead=15, stride=1, lucidity=0)
+
+arnn.fit(X, y, epsilon=1e-10, cap=1050, verbose=True)
+out2 = arnn.generate(seed=X[:, :5], num_samples=100)
