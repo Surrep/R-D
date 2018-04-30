@@ -43,41 +43,35 @@ class AutoRNN:
 
         return seq
 
-    def fit(self, X, y, epsilon=1e-5, cap=500, verbose=False):
-        X = X.copy()  # copy data so as not to mutate original
+    def fit(self, X, y, epsilon=1e-6, verbose=False):
+        cost = math.inf  # must begin to fit
+        dW1 = np.zeros_like(self.W1)
+        trials = 0
 
-        # loop through entire sequence
-        for t in range(0, len(X[0]), self.stride):
+        while cost > epsilon:
+            cost = 0
+            # loop through input sequence
+            for t in range(0, len(X[0]), self.stride):
+                xt = self.get_samples(X, t, self.seq_len)
+                yt = self.get_samples(y, t + self.seq_len, self.look_ahead)
 
-            xt = self.get_samples(X, t, self.seq_len)
-            yt = self.get_samples(y, t + self.seq_len, self.look_ahead)
+                if xt is None or yt is None:  # we have reached end of sequence
+                    break
 
-            if xt is None or yt is None:  # we have reached end of sequence
-                return
-
-            cost = math.inf  # cost is inf before training
-            count = 0  # attempts to minimize loss
-            attempts_exhausted = False  # true if we take too long to minimize error
-
-            # attempt to minimize distance between predictions and true sample
-            while cost > epsilon and not attempts_exhausted:
                 # get predictions
                 zt = xt.dot(self.W1)
 
                 # compute cost based on predictions
-                cost = self.compute_cost(zt, yt)
+                cost += self.compute_cost(zt, yt)
 
                 # propogate loss back to weights
                 dy = zt - yt
-                dW1 = xt.T.dot(dy)
+                dW1 += xt.T.dot(dy)
 
-                # update weights based on loss
-                self.W1 -= self.learning_rate * dW1
+            trials += 1
+            # update weights based on loss
+            self.W1 -= self.learning_rate * dW1
 
-                # check for terminating conditions
-                count += 1
-                attempts_exhausted = count > cap
-
-            # after the prediction is made (zt), we incorporate it into our signal
-            X = self.update_sequence(seq=X, pred=zt, target=yt, t_step=t)
+            if verbose:
+                print(trials, cost)
 
