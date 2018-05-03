@@ -23,7 +23,18 @@ class AutoRNN:
         return ((yhat - y) ** 2 / 2).sum()
 
     def generate(self, seed, num_samples):
-        pass
+        out = np.zeros((1, num_samples))
+        out[:, :len(seed[0])] = seed
+
+        for t in range(0, num_samples, self.stride):
+            t_end = t + self.seq_len
+            new_samples = out[:, t:t_end].dot(self.W1)
+            if t_end + self.look_ahead > num_samples:
+                break
+
+            out[:, t_end:t_end + self.look_ahead] = new_samples
+
+        return out
 
     def update_sequence(self, seq, pred, target, t_step):
         """ 
@@ -44,11 +55,15 @@ class AutoRNN:
         return seq
 
     def fit(self, X, y, epsilon=1e-6, verbose=False):
+        X = X.copy()
         cost = math.inf  # must begin to fit
         dW1 = np.zeros_like(self.W1)
         trials = 0
 
         while cost > epsilon:
+            # update weights based on loss
+            self.W1 -= self.learning_rate * dW1
+
             cost = 0
             # loop through input sequence
             for t in range(0, len(X[0]), self.stride):
@@ -68,10 +83,21 @@ class AutoRNN:
                 dy = zt - yt
                 dW1 += xt.T.dot(dy)
 
-            trials += 1
-            # update weights based on loss
-            self.W1 -= self.learning_rate * dW1
+                X = self.update_sequence(seq=X, pred=zt, target=yt, t_step=t)
 
+            trials += 1
             if verbose:
                 print(trials, cost)
 
+
+sounds = '/Users/tru/Desktop/english/'
+sample_rate, data = read(sounds + 'calc.wav')
+
+X = (data.reshape(1, -1) / np.max(data))[:, 42000:143100]
+y = X
+
+arnn = AutoRNN(learning_rate=0.1, seq_len=25,
+               look_ahead=150, stride=5, lucidity=1)
+
+arnn.fit(X, y, epsilon=125, verbose=True)
+out2 = arnn.generate(seed=X[:, :5], num_samples=10000)
