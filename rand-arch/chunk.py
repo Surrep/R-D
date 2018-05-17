@@ -21,6 +21,17 @@ def rand_rect(max_area):
     return (w, h)
 
 
+def init_weights(data_chunks, dims):
+    return [
+        np.random.randn(chunk.shape[0], dims) * 0.1
+        for chunk in data_chunks
+    ]
+
+
+def forward(data_chunks, weights):
+    return [chunk.T.dot(W).sum() for (chunk, W) in zip(data_chunks, weights)]
+
+
 def chunk_input(data):
     indices = index_list(data)
     r_indxs = list(np.random.choice(
@@ -28,7 +39,7 @@ def chunk_input(data):
 
     chunks = []
     while r_indxs:
-        area = np.random.randint(len(r_indxs))
+        area = np.random.randint(len(r_indxs) / 64)
         w, h = rand_rect(area + 1)
 
         chunk = np.array([data[tuple(indices[r_indxs.pop()])]
@@ -39,5 +50,10 @@ def chunk_input(data):
     return chunks
 
 
-a = np.random.randn(3550, 2421, 3)
-chunks = chunk_input(a)
+a = mnist.data[0]
+
+input_chunks = chunk_input(a.reshape(28, 28))
+weights = init_weights(input_chunks, dims=3)
+out = forward(input_chunks, weights)
+
+
