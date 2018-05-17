@@ -39,5 +39,5 @@ def chunk_input(data):
     return chunks
 
 
-a = np.random.randn(5, 5, 3)
+a = np.random.randn(3550, 2421, 3)
 chunks = chunk_input(a)
