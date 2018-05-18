@@ -10,7 +10,7 @@ class RandomNeuralNetwork():
         self.neurons = neurons
         self.kinesis = kinesis
 
-        self.input_scaffold = self.gen_scaffold(X)
+        self.input_scaffold, self.gene_pool = self.gen_scaffold(X)
 
     def gen_layer_dims(self, size, depth):
         return tuple([
@@ -31,7 +31,8 @@ class RandomNeuralNetwork():
         indices, i_count = self.get_indices(data.shape)
         random_indices = list(np.random.choice(i_count, i_count, False))
 
-        layers = []
+        layers = list()
+        connections = list()
         while i_count:  # while there is data left to group
             feed_size = np.random.randint(i_count) + 1
             dims = self.gen_layer_dims(size=feed_size, depth=len(data.shape))
@@ -40,6 +41,11 @@ class RandomNeuralNetwork():
             layer = np.array([random_indices.pop() for _ in range(layer_size)])
             layers.append(layer.reshape(dims))
 
+            connections.extend(dims)
+
             i_count -= layer_size
 
-        return layers
+        return layers, set(connections)
+
+    def feed(self, scaffold, data):
+        return [data[layer].shape for layer in scaffold]
