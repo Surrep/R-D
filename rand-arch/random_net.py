@@ -14,6 +14,9 @@ class RandomNeuralNetwork():
 
         self.input_scaffold, self.gene_pool = self.gen_scaffold(X)
         self.connections = self.gen_connections()
+        self.input_data = self.feed(self.input_scaffold, self.X.reshape(-1))
+
+        print(self.connections)
 
     def gen_layer_dims(self, size, depth):
         return tuple([
@@ -50,28 +53,32 @@ class RandomNeuralNetwork():
 
         return layers, set(gene_pool)
 
-    def gen_mutation(self):
-        mutation = np.random.randint(np.sqrt(self.neurons))
+    def gen_mutation(self, env_size):
+        mutation = np.random.randint(np.sqrt(env_size))
         mutation_occured = np.random.choice([1, 0], p=self.mutation_rate)
 
         return mutation, mutation_occured
 
     def gen_connections(self):
         connections = list()
-        while self.neurons > 0:
-            mutation, mutation_occurred = self.gen_mutation()
+        remaining_neurons = self.neurons
+        while remaining_neurons > 0:
+            mutation, mutation_occurred = self.gen_mutation(remaining_neurons)
             if mutation_occurred:
                 self.gene_pool.add(mutation)
 
             gene_1 = np.random.choice(list(self.gene_pool))
             gene_2 = np.random.choice(list(self.gene_pool))
 
-            conn_matrix = np.random.randn(gene_1, gene_2)
+            conn_matrix = np.ones((gene_1, gene_2)) / self.neurons
             connections.append(conn_matrix)
 
-            self.neurons -= gene_1 * gene_2
+            remaining_neurons -= gene_1 * gene_2
 
         return connections
+
+    def forward(self):
+        pass
 
     def feed(self, scaffold, data):
         return [data[layer] for layer in scaffold]
