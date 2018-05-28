@@ -35,4 +35,4 @@ class MetaNet():
         indices = np.array([np.ravel(i) for i in np.indices(constraints)]).T
         valid_tuples = [tuple(index) for index in indices]
 
-        
+        [print(tup) for tup in valid_tuples]

@@ -7,4 +7,4 @@ import numpy as np
 mnist = fetch_mldata('MNIST original')
 a = mnist.data[0].reshape(28, 28)
 
-mn = MetaNet(X_shape=a.shape)
+mn = MetaNet(X_shape=(10, 10, 3))
