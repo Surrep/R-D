@@ -3,7 +3,6 @@ import numpy as np
 
 class MetaSynapse():
     def __init__(self, max_size, constraints, contact_points):
-
         root = np.power(max_size, 1 / len(constraints))
         shape = [min(constraint, root) for constraint in constraints]
 
@@ -23,19 +22,13 @@ class MetaNet():
     def __init__(self, X_shape, y_shape=None):
         self.X_shape = X_shape
         self.y_shape = y_shape
+        self.network = list()
 
-        self.gen_network(X_shape)
-
-    def gen_network(self, constraints):
-        indices = np.array([np.ravel(i) for i in np.indices(constraints)]).T
+        indices = np.array([np.ravel(i) for i in np.indices(self.X_shape)]).T
         np.random.shuffle(indices)
 
-        remaining_data = np.prod(constraints)
-        network = list()
-
+        remaining_data = np.prod(self.X_shape)
         while remaining_data:
-            synapse = MetaSynapse(remaining_data, constraints, indices)
+            synapse = MetaSynapse(remaining_data, self.X_shape, indices)
             remaining_data -= synapse.size
-            network.append(synapse)
-
-        return network
+            self.network.append(synapse)
