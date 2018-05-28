@@ -1,38 +1,41 @@
 import numpy as np
 
 
+class MetaSynapse():
+    def __init__(self, max_size, constraints, contact_points):
+
+        root = np.power(max_size, 1 / len(constraints))
+        shape = [min(constraint, root) for constraint in constraints]
+
+        self.constraints = constraints
+        self.shape = tuple([1 + np.random.randint(dim) for dim in shape])
+        self.size = np.prod(self.shape)
+
+        length = None if max_size == self.size else max_size - self.size - 1
+        self.contact_points = contact_points[slice(max_size - 1, length, -1)]
+
+
 class MetaNet():
     """
         This network deals with all hyperparameters
     """
 
-    def __init__(self, X_shape, y_shape=None, neurons=1000):
+    def __init__(self, X_shape, y_shape=None):
         self.X_shape = X_shape
         self.y_shape = y_shape
-        self.neurons = neurons
 
-        network = self.gen_network(self.X_shape)
-        wires = self.gen_wiring(network, self.X_shape)
-
-    def gen_synapse(self, size, constraints):
-        root = np.power(size, 1 / len(constraints))
-        shape = [min(constraint, root) for constraint in constraints]
-
-        return tuple([1 + np.random.randint(dim) for dim in shape])
+        self.gen_network(X_shape)
 
     def gen_network(self, constraints):
-        network = list()
-        contact_points = np.prod(constraints)
+        indices = np.array([np.ravel(i) for i in np.indices(constraints)]).T
+        np.random.shuffle(indices)
 
-        while contact_points:
-            synapse_shape = self.gen_synapse(contact_points, constraints)
-            contact_points -= np.prod(synapse_shape)
-            network.append(synapse_shape)
+        remaining_data = np.prod(constraints)
+        network = list()
+
+        while remaining_data:
+            synapse = MetaSynapse(remaining_data, constraints, indices)
+            remaining_data -= synapse.size
+            network.append(synapse)
 
         return network
-
-    def gen_wiring(self, network, constraints):
-        indices = np.array([np.ravel(i) for i in np.indices(constraints)]).T
-        valid_tuples = [tuple(index) for index in indices]
-
-        [print(tup) for tup in valid_tuples]
