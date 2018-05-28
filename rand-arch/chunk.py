@@ -1,5 +1,5 @@
 from sklearn.datasets import fetch_mldata
-from random_net import RandomNeuralNetwork
+from meta import MetaNet
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,4 +7,4 @@ import numpy as np
 mnist = fetch_mldata('MNIST original')
 a = mnist.data[0].reshape(28, 28)
 
-rnn = RandomNeuralNetwork(X=a)
+mn = MetaNet(X_shape=a.shape)
