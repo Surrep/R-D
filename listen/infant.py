@@ -20,7 +20,15 @@ def create_time_fourier(sound, opts=(2 ** 14, 2 ** 5, 100)):
     return out
 
 
-sounds = [read(sound_lib_path + sound) for sound in sys.argv[1:]]
-spectra = [create_time_fourier(data) for rate, data in sounds]
+def flatten(sound):
+    if len(sound.shape) > 1:
+        sound = sound[:, 0]
 
-# imsave('/Users/tru/Desktop/four.jpeg', out)
+    return sound
+
+
+sounds = [read(sound_lib_path + sound) for sound in sys.argv[1:]]
+spectra = [create_time_fourier(flatten(data[:150000])) for rate, data in sounds]
+
+for i, spectrum in enumerate(spectra):
+    imsave('/Users/tru/Desktop/spec{}.jpeg'.format(i), spectrum.T)
