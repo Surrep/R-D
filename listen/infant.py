@@ -2,19 +2,25 @@ from scipy.io.wavfile import read, write
 from scipy.misc import imread, imsave
 import matplotlib.pyplot as plt
 import numpy as np
-import math
-sounds = '/Users/tru/Desktop/english/'
-sample_rate, data = read(sounds + 'tru1.wav')
+import sys
+
+sound_lib_path = '/Users/tru/Desktop/english/'
+# sample_rate, data = read(sounds + 'tru1.wav')
 # 28000 - 50000 -- Hello for calc.wav
-data = data[:, 0]
 
-l = 2 ** 14
-ch = 2 ** 5
-skip = 100
-out = np.zeros((len(data) // skip, l // ch))
 
-for ts, t in enumerate(range(0, len(data) - l, skip)):
-    ffti = np.fft.fft(data[t:t + l], n=l // ch)
-    out[ts] = np.absolute(ffti)
+def create_time_fourier(sound, opts=(2 ** 14, 2 ** 5, 100)):
+    lapse, channels, skip = opts
+    out = np.zeros((len(sound) // skip, lapse // channels))
 
-imsave('/Users/tru/Desktop/four.jpeg', out)
+    for ts, t in enumerate(range(0, len(sound) - lapse, skip)):
+        fft_at_t = np.fft.fft(sound[t:t + lapse], n=lapse // channels)
+        out[ts] = np.absolute(fft_at_t)
+
+    return out
+
+
+sounds = [read(sound_lib_path + sound) for sound in sys.argv[1:]]
+spectra = [create_time_fourier(data) for rate, data in sounds]
+
+# imsave('/Users/tru/Desktop/four.jpeg', out)
