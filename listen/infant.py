@@ -1,10 +1,11 @@
 from scipy.io.wavfile import read, write
 from scipy.misc import imread, imsave
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-sound_lib_path = '/Users/tru/Desktop/english/'
+sound_lib_path = '/Users/tru/Desktop/'
 
 
 class Sound():
@@ -16,11 +17,12 @@ class Sound():
     def write(self, path):
         write(path, self.rate, self.data)
 
-    def get_spectrum(lapse=100, skip=10):
-        lapse, channels, skip = opts
+    def get_frequencies(self, start=None, end=None):
+        if start is None or end is None:
+            start = 0
+            end = len(self.data)
 
-        for ts, t in enumerate(range(0, len(sound) - lapse, skip)):
-            fft_at_t = np.fft.fft(sound[t:t + lapse])
+        return np.fft.fft(self.data[start:end])
 
     @staticmethod
     def flatten(sound):
@@ -31,4 +33,21 @@ class Sound():
 
 
 sounds = [Sound(sound_lib_path + sound) for sound in sys.argv[1:]]
-print(sounds)
+s0 = sounds[0]
+
+
+fig = plt.figure()
+graph, = plt.plot([], [], 'o')
+
+
+def animate(i):
+    freqs = s0.get_frequencies(i, i + 100)
+    freqs /= np.max(np.absolute(freqs))
+    graph.set_data(freqs.real, freqs.imag)
+    return graph
+
+
+ani = animation.FuncAnimation(
+    fig, animate, frames=100, interval=200)
+
+plt.show()
