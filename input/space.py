@@ -24,27 +24,46 @@ class Analyzer():
 
 
 # mnist = fetch_mldata('MNIST original')
-img = imread('/Users/tru/Desktop/photos/bord.jpg')
+img = imread('/Users/tru/Desktop/photos/shi.jpg')
 # img = mnist.data[0].reshape(1, -1)
-# points = np.linspace(0, base ** 3, slices)
-# points = np.flip(np.array([points // base ** i %
-#                            base for i in range(dims)]).T, 1)[:-1]
 
-rd = img.reshape(-1, 3)
-print(rd)
+slices = 6
+dims = 3
+base = 256
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
+points = np.linspace(0, base ** 3, slices)
+points = np.flip(np.array([points // base ** i %
+                           base for i in range(dims)]).T, 1)[:-1]
 
-ax.scatter(rd[:, 0], rd[:, 1], rd[:, 2])
-plt.show()
+
+# rd = img.reshape(-1, 3)
+# print(rd)
+
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+
+# ax.scatter(rd[:, 0], rd[:, 1], rd[:, 2])
+# plt.show()
 
 # plt.imshow(img[400:450, 400:450])
 # plt.show()
-# slices = 2
-# dims = 3s
-# base = 256
+
 
 # points = np.random.randint(0, base, (slices, dims))
 # img = np.random.randint(0, 256, (3, 3, 3))
-# a = Analyzer(img, points)
+a = Analyzer(img, points)
+# fig, ax = plt.subplots(slices - 1, 2)
+
+# print(len(a.slices))
+# for i in range(slices - 1):
+#     ax[i, 0].imshow(a.slices[i])
+
+#     FS = np.fft.fft2(a.slices[i])
+#     ax[i, 1].imshow(np.absolute(FS))
+
+# plt.show()
+
+for i, s in enumerate(a.slices):
+    imsave('/Users/tru/Desktop/slices/im{}.jpg'.format(i), s)
+
+# imsave('/Users/tru/Desktop/flam.jpg', a.binned_data)
