@@ -27,7 +27,7 @@ class Analyzer():
 img = imread('/Users/tru/Desktop/photos/shi.jpg')
 # img = mnist.data[0].reshape(1, -1)
 
-slices = 6
+slices = 9
 dims = 3
 base = 256
 

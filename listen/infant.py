@@ -32,22 +32,45 @@ class Sound():
         return sound
 
 
-sounds = [Sound(sound_lib_path + sound) for sound in sys.argv[1:]]
+sounds = [Sound(sound_lib_path + file) for file in sys.argv[1:]]
 s0 = sounds[0]
+print(len(s0.data))
 
 
-fig = plt.figure()
-graph, = plt.plot([], [], 'o')
+def get_colors(r, g, b):
+    return np.mgrid[:255:complex(r), 0:255:complex(g), 0:255:complex(b)].reshape(3, -1).T
+
+
+offset = 30000
+freq_bins = 200
+colors = (1, 2, 6)
+num_plots = np.prod(colors)
+
+
+color_seq = get_colors(*colors)
+fig, axes = plt.subplots(num_plots, 1)
+graphs = [None] * num_plots
+freq_ranges = np.linspace(0, freq_bins / 2, num_plots + 1).astype(np.int)
+
+for i in range(num_plots):
+    graphs[i], = axes[i].plot([], [], 'o', c=color_seq[i] / 255.0)
+    axes[i].set_xlim(-1.3, 1.3)
+    axes[i].set_ylim(-1.3, 1.3)
 
 
 def animate(i):
-    freqs = s0.get_frequencies(i, i + 100)
+    freqs = s0.get_frequencies(offset + i, offset + i + freq_bins)
     freqs /= np.max(np.absolute(freqs))
-    graph.set_data(freqs.real, freqs.imag)
-    return graph
+
+    for i in range(num_plots):
+        f_s = freq_ranges[i]
+        f_e = freq_ranges[i + 1]
+        graphs[i].set_data(freqs.real[f_s:f_e], freqs.imag[f_s:f_e])
+
+    return fig
 
 
 ani = animation.FuncAnimation(
-    fig, animate, frames=100, interval=200)
+    fig, animate, frames=120000, interval=10)
 
 plt.show()
