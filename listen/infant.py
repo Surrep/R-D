@@ -1,79 +1,43 @@
 from scipy.io.wavfile import read, write
-from scipy.misc import imread, imsave
+from sound import Sound
+from image import get_colors
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
+import glob
 import sys
+import os
 
-sound_lib_path = '/Users/tru/Desktop/'
+np.set_printoptions(suppress=True, linewidth=1000, threshold=np.nan)
 
+sound_lib_path = '/Users/tru/Desktop/.../sounds/'
+chops_lib_path = '/Users/tru/Desktop/.../chops/'
 
-class Sound():
-    def __init__(self, path):
-        rate, data = read(path)
-        self.rate = rate
-        self.data = Sound.flatten(data)
-
-    def write(self, path):
-        write(path, self.rate, self.data)
-
-    def get_frequencies(self, start=None, end=None):
-        if start is None or end is None:
-            start = 0
-            end = len(self.data)
-
-        return np.fft.fft(self.data[start:end])
-
-    @staticmethod
-    def flatten(sound):
-        if len(sound.shape) > 1:
-            sound = sound[:, 0]
-
-        return sound
-
-
-sounds = [Sound(sound_lib_path + file) for file in sys.argv[1:]]
+sounds = [Sound(sound_lib_path + file_name) for file_name in sys.argv[1:]]
 s0 = sounds[0]
-print(len(s0.data))
+
+for file in glob.glob(chops_lib_path + '*'):
+    os.remove(file)
 
 
-def get_colors(r, g, b):
-    return np.mgrid[:255:complex(r), 0:255:complex(g), 0:255:complex(b)].reshape(3, -1).T
-
-
-offset = 18000
+offset = 0
 step = 1000
-freq_bins = 10000
-colors = (1, 1, 1)
-num_plots = np.prod(colors)
+freq_bins = 1000
 
 
-color_seq = get_colors(*colors)
-fig, axes = plt.subplots(num_plots, 1)
-graphs = [None] * num_plots
-freq_ranges = np.linspace(0, freq_bins, num_plots + 1).astype(np.int)
+word = [0,0]
+for i in range(offset, len(s0.data) - freq_bins, step):
+    freqs = s0.get_frequencies(i, i + freq_bins)    
+    bump = np.round(np.linalg.norm(freqs) / 1.2e11,0)
 
-for i in range(num_plots):
-    ax = axes[i] if type(axes) is np.ndarray else axes
-    graphs[i], = ax.plot([], [], 'o', c=color_seq[i] / 255.0)
-    ax.set_xlim(-1.3, 1.3)
-    ax.set_ylim(-1.3, 1.3)
-
-
-def animate(i):
-    t = i * step + offset
-    freqs = s0.get_frequencies(t, t + freq_bins)
-    freqs /= np.max(np.absolute(freqs))
-
-    for i in range(num_plots):
-        f_s = freq_ranges[i]
-        f_e = freq_ranges[i + 1]
-        graphs[i].set_data(freqs.real[f_s:f_e], freqs.imag[f_s:f_e])
-
-    return fig
-
-
-ani = animation.FuncAnimation(
-    fig, animate, frames=120000, interval=10)
-
-plt.show()
+    if bump and not word[0]:
+        word[0] = i
+        continue
+    
+    if not bump and word[0]:
+        word[1] = i
+        write(chops_lib_path+'{}-{}.wav'.format(*word),44100, s0.data[slice(*word)])
+        word = [0,0]
+        continue
+    
