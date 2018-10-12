@@ -1,7 +1,4 @@
-from scipy.io.wavfile import read, write
-from scipy.misc import imread, imsave
-from IPython.display import Audio
-from image import get_colors
+from sound import Sound
 
 from matplotlib.widgets import Slider
 import matplotlib.animation as animation
@@ -9,17 +6,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-rate, data = read('/Users/tru/Desktop/.../sounds/' + sys.argv[1])
-data = data[:,1] / np.max(data)
+s0 = Sound('/Users/tru/Desktop/.../sounds/' + sys.argv[1]).normalize()
 
-s = 100000
-e = 150000
+"""
+Poop labels
+-----------
+
+27000-49000 poop1.wav
+47000-70000 poop2.wav
+
+"""
+
+s = 25000
+e = 40000
 r = 1000
 
 fig, ax = plt.subplots()
 l, = plt.plot(0,0,'.')
-plt.axis([-40,40,-40,40])
-t = ax.text(7,7,'')
+plt.axis([-400,400,-400,400])
+# t = ax.text(7,7,'')
 
 
 
@@ -28,8 +33,8 @@ samp = Slider(axamp, 'Amp', 0, e-s, valinit=0)
 
 def update(val):
     v = int(val)
-    new_data = np.fft.fft(data[s+v:s+v+r])
-    t.set_text(np.linalg.norm(new_data))
+    new_data = np.fft.fft(s0.data[s+v:s+v+r])
+    # t.set_text(np.linalg.norm(new_data))
     l.set_data(new_data.real, new_data.imag)
     fig.canvas.draw_idle()
 
