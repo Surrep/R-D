@@ -17,25 +17,24 @@ Poop labels
 
 """
 
-s = 25000
-e = 40000
+s = 27000
+e = 49000
 r = 1000
 
 fig, ax = plt.subplots()
 l, = plt.plot(0,0,'.')
-plt.axis([-400,400,-400,400])
+plt.axis([-10,10,-10,10])
 # t = ax.text(7,7,'')
-
-
-
+all_data = np.zeros(e-s + r).astype(np.complex128)
 axamp = plt.axes([0.25, .03, 0.50, 0.02])
 samp = Slider(axamp, 'Amp', 0, e-s, valinit=0)
 
 def update(val):
     v = int(val)
-    new_data = np.fft.fft(s0.data[s+v:s+v+r])
-    # t.set_text(np.linalg.norm(new_data))
-    l.set_data(new_data.real, new_data.imag)
+    
+    all_data[v:v+r] = np.fft.fft(s0.data[s+v:s+v+r])
+    l.set_data(all_data.real, all_data.imag)
+    
     fig.canvas.draw_idle()
 
 samp.on_changed(update)
