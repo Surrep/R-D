@@ -2,15 +2,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from resource import Resource
 from scipy.misc import imread, imsave
-
-
-class Resource:
-    def __init__(self, attrs, stub='%s%s.%s'):
-        self.stub = stub
-        self.attrs = attrs
-        self.string = self.stub % self.attrs
-
 
 b = 0
 p = 1
