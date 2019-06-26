@@ -1,2 +1,0 @@
-VISUAL = 0
-AUDITORY = 1
