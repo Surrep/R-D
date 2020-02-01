@@ -2,28 +2,36 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from mpl_toolkits.axes_grid1 import AxesGrid
-from mlxtend.data import loadlocal_mnist
+from keras.datasets import mnist
 
 # Get training data:
-X, y = loadlocal_mnist(
-    images_path='/Users/trumanpurnell/Workspace/bblabs/deep-blob/learn2learn/data/train-images-idx3-ubyte',
-    labels_path='/Users/trumanpurnell/Workspace/bblabs/deep-blob/learn2learn/data/train-labels-idx1-ubyte')
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-# Preprocess
-X = X.astype(float) / 255
-y_hot = np.zeros((y.size, 10))
-y_hot[np.arange(y.size), y] = 1
+# Normalize images
+test_images = X_test.reshape(-1, 784) / 255
+train_images = X_train.reshape(-1, 784) / 255
+
+# One-hot encode labels
+y_train_hot = np.zeros((y_train.size, 10))
+y_train_hot[np.arange(y_train.size), y_train] = 50
+
+y_test_hot = np.zeros((y_test.size, 10))
+y_test_hot[np.arange(y_test.size), y_test] = 50
+
+# Assign one-hot labels
+test_labels = y_test_hot
+train_labels = y_train_hot
 
 # Initialize the Weights: 10 Template Images which we will match against
-weights = np.random.rand(784, 10) / 10
+weights = 0.2 * np.random.random((784, 10)) - 0.1
 
 # Train
 alpha = 0.0000001
-for i in range(1000):
-    predictions = X.dot(weights)
-    deltas = predictions - y_hot
+for i in range(100):
+    predictions = train_images.dot(weights)
+    deltas = predictions - train_labels
     error = np.linalg.norm(deltas)
-    gradient = X.T.dot(deltas)
+    gradient = train_images.T.dot(deltas)
 
     weights -= alpha * gradient
 
