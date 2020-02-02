@@ -1,6 +1,6 @@
 import numpy as np
 
-# Initialize
+# Inputs
 train_lights = np.array([
     [1, 0, 1],
     [0, 1, 1],
@@ -8,9 +8,13 @@ train_lights = np.array([
     [1, 1, 1],
 ])
 
+# Weights
 weights = np.random.randn(3, 1)
+
+# Labels
 walk_or_stop = np.array([10, 10, 0, 0]).reshape(4, 1)
 
+# Parameters
 alpha = 0.01
 
 # Train
