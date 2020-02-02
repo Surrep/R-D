@@ -1,5 +1,6 @@
-node_modules
 .vscode
-__pycache__
 .DS_Store
-data
+
+main.py
+__pycache__
+__init__.py
