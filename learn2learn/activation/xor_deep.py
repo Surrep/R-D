@@ -11,6 +11,10 @@ train_lights = np.array([
 weights_0_1 = np.random.randn(3, 2)
 weights_1_2 = np.random.randn(1, 3)
 
+# Initial Weights
+weights_0_1_init = weights_0_1.copy()
+weights_1_2_init = weights_1_2.copy()
+
 # Labels
 walk_or_stop = np.array([5, 5, 0, 0])
 
@@ -40,3 +44,16 @@ for i in range(int(1e5)):
 
     if not i % 1000:
         print(error)
+
+# Save Weights
+base_file_path = './{}'.format('/'.join(__name__.split('.')[:-1]))
+div_file_path = '{}/{}'.format(base_file_path, 'weights_diverged.npz')
+conv_file_path = '{}/{}'.format(base_file_path, 'weights_converged.npz')
+
+file_name = conv_file_path if error < 1 else div_file_path
+file_handle = open(file_name, 'a')
+
+np.savez(file_name,
+         weights_0_1_init, weights_0_1,
+         weights_1_2_init, weights_1_2)
+

@@ -1,6 +1,8 @@
+# Local
 .vscode
 .DS_Store
 
+# Python
 main.py
 __pycache__
 __init__.py

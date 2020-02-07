@@ -1,6 +1,6 @@
 import numpy as np
 from keras.datasets import mnist
-from utils import show_image_grid
+from ..utilities.plotting import show_image_grid
 
 
 # Get training data:
@@ -47,3 +47,5 @@ print(np.sum(accuracy) / np.size(accuracy))
 all_miss_indices = np.argwhere(accuracy == False).flatten()
 sample_miss_indices = np.random.choice(all_miss_indices, size=100)
 sample_miss_images = test_images[sample_miss_indices]
+
+show_image_grid(weights.T.reshape(-1, 28, 28), 2, 5)
