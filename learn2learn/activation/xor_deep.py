@@ -8,15 +8,15 @@ train_lights = np.array([
 ])
 
 # Weights
-weights_0_1 = np.random.randn(3, 2)
-weights_1_2 = np.random.randn(1, 3)
+weights_0_1 = np.random.randn(2, 2)
+weights_1_2 = np.random.randn(1, 2)
 
 # Initial Weights
 weights_0_1_init = weights_0_1.copy()
 weights_1_2_init = weights_1_2.copy()
 
 # Labels
-walk_or_stop = np.array([5, 5, 0, 0])
+walk_or_stop = np.array([10, 10, 0, 10])
 
 # Parameters
 alpha = 0.0001
