@@ -3,6 +3,7 @@
 .DS_Store
 
 # Python
+solution.py
 main.py
 __pycache__
 __init__.py
