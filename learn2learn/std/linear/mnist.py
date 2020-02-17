@@ -1,6 +1,7 @@
 import numpy as np
+
 from keras.datasets import mnist
-from ..utilities.plotting import show_image_grid
+from ...utilities.plotting import show_image_grid
 
 
 # Get training data:
