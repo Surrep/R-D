@@ -5,6 +5,9 @@
 # Python
 solution.py
 main.py
-__pycache__
-__init__.py
+__*
 data
+
+# Misc
+fastText
+word2vec-pytorch
