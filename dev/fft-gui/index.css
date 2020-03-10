@@ -1,0 +1,26 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+}
+
+.pane {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+}
+
+.full {
+    position: fixed;
+    background-color: darkseagreen;
+}
+
+.left {
+    left: 0;
+    background-color: greenyellow;
+}
+
+.right {
+    right: 0;
+    background-color: olivedrab;
+}

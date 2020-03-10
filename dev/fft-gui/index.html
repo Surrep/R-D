@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+    <title>i am a gui</title>
+    <meta charset='utf-8'>
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <!-- <canvas id="time" class="left pane"></canvas>
+    <canvas id="freq" class="right pane"></canvas> -->
+
+    <canvas id="main" class="full"></canvas>
+
+    <script type="module">
+        import main from './index.js'
+
+        main.call(window)
+    </script>
+</body>
+
+</html>
