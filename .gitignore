@@ -3,8 +3,6 @@
 .DS_Store
 
 # Python
-main.py
-solution.py
 *.npy
 __*
 data
