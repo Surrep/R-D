@@ -3,11 +3,8 @@
 .DS_Store
 
 # Python
-solution.py
 main.py
+solution.py
+*.npy
 __*
 data
-
-# Misc
-fastText
-word2vec-pytorch
