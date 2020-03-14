@@ -32,7 +32,7 @@ def imshow_many(images, rows, cols):
     plt.show()
 
 
-def animate(data, impl, plot_size=13000):
+def animate(data, impl, frames, plot_size=13000):
     fig, ax = plt.subplots()
     lines, = plt.plot(0, 0, '.')
 
@@ -41,7 +41,7 @@ def animate(data, impl, plot_size=13000):
     _ = animation(fig=fig,
                   func=lambda step: impl(data, step, lines),
                   init_func=lambda: None,
-                  frames=len(data),
+                  frames=frames,
                   repeat=False,
                   interval=1)
 

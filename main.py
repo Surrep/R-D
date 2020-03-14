@@ -1,29 +1,12 @@
-from tools.io import sndread_dir
-from tools.plot import slide, animate, plot
-from tools.sound import dft, sinusoid, transform
+from tools.io import sndread
+from tools.plot import slide, animate, plot, imshow_many, imshow
+from tools.sound import dft, sinusoid, transform, spectrogram
 
 import numpy as np
 
+sample_rate, signal = sndread(
+    'data/speech/speech_commands_v0.02/go/0a2b400e_nohash_1.wav')
 
-sample_rate = 44100
-signal = np.concatenate((
-    sinusoid(frequency=200, duration=0.5),
-    sinusoid(frequency=400, duration=0.5),
-))
+spec = spectrogram(signal, range(1000))
 
-f, ps, idx = transform(signal)
-
-spectrogram = dft(signal, idx[:8], sample_rate)
-coefficients = np.fft.rfft(signal)
-
-
-def slide_impl(data, time_step, lines, figure):
-    time_step = int(time_step)
-
-    coeffs = data[:, :time_step].cumsum(1)
-
-    lines.set_data(coeffs.real, coeffs.imag)
-    figure.canvas.draw_idle()
-
-
-slide(spectrogram, slide_impl, range(len(signal)))
+imshow(np.abs(spec))
