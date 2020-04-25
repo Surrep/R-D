@@ -17,10 +17,17 @@ def join_paths(*paths):
 def sndread_dir(dir_path):
     abs_dir_path = abs_path(dir_path)
 
-    return [
-        sndread(join_paths(abs_dir_path, path))
-        for path in os.listdir(abs_dir_path)
-    ]
+    samples = []
+    for path in os.listdir(abs_dir_path):
+        sample_rate, sample = sndread(join_paths(abs_dir_path, path))
+
+        align_ratio = int(np.ceil(sample.size / sample_rate))
+        aligned_sample = np.zeros(align_ratio * sample_rate)
+        aligned_sample[:sample.size] = sample
+
+        samples.append(aligned_sample)
+
+    return np.vstack(tuple(samples))
 
 
 def sndread(path):

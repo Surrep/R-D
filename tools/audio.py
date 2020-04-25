@@ -21,14 +21,27 @@ def dft(signal, freqs, sample_rate=44100):
     return spectrogram
 
 
-def spectrogram(signal, freqs):
-    len_freqs = len(freqs)
-    len_signal = len(signal)
+def real_spectrogram(signal, num_freqs):
+    num_samples = len(signal)
+    num_freqs_adjusted = num_freqs * 2 - 1
 
-    result = np.zeros((len_freqs//2, len_signal), complex)
+    result = np.zeros((num_freqs, num_samples), complex)
 
-    for si in range(len_signal-len_freqs):
-        result[:, si] = np.fft.rfft(signal[si:si+len_freqs])[:len_freqs//2]
+    for si in range(num_samples):
+        samples = signal[si:si+num_freqs_adjusted]
+        result[:, si] = np.fft.rfft(samples, num_freqs_adjusted)
+
+    return result
+
+
+def real_inv_spectrogram(spectrogram):
+    num_freqs, num_samples = spectrogram.shape
+
+    result = np.zeros(num_samples + num_freqs * 2)
+
+    for si in range(num_samples):
+        samples = np.fft.irfft(spectrogram[:, si])
+        result[si:si+samples.size] = samples
 
     return result
 

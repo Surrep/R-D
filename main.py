@@ -1,12 +1,21 @@
-from tools.io import sndread
-from tools.plot import slide, animate, plot, imshow_many, imshow
-from tools.sound import dft, sinusoid, transform, spectrogram
+from tools.plot import slide
+from tools.io import sndread_dir, play
+from tools.audio import real_spectrogram, real_inv_spectrogram
 
 import numpy as np
+import matplotlib.pyplot as plt
 
-sample_rate, signal = sndread(
-    'data/speech/speech_commands_v0.02/go/0a2b400e_nohash_1.wav')
+# Parameters
+num_freqs = 1000
+sample_rate = 16000
+colors = ['r.', 'g.', 'b.', 'y.', 'k.', 'm.', 'c.']
 
-spec = spectrogram(signal, range(1000))
+# Read data
+X = sndread_dir('./data/speech/speech_commands_v0.02/happy')
 
-imshow(np.abs(spec))
+# Spectrogram
+spectrogram = real_spectrogram(signal=X[1], num_freqs=num_freqs)
+
+# Display
+plt.imshow(np.abs(spectrogram), aspect='auto')
+plt.show()
