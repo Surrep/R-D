@@ -14,11 +14,12 @@ def join_paths(*paths):
     return os.path.join(*paths)
 
 
-def sndread_dir(dir_path):
+def sndread_dir(dir_path, num_files=None):
     abs_dir_path = abs_path(dir_path)
+    abs_file_paths = os.listdir(abs_dir_path)[:num_files]
 
     samples = []
-    for path in os.listdir(abs_dir_path):
+    for path in abs_file_paths:
         sample_rate, sample = sndread(join_paths(abs_dir_path, path))
 
         align_ratio = int(np.ceil(sample.size / sample_rate))
