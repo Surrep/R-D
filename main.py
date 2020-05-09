@@ -1,51 +1,44 @@
 from tools.io import sndread_dir, play
 from tools.audio import real_spectrogram, real_inv_spectrogram
 
-from tensorflow.keras import backend as K
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D
-from tensorflow.keras.callbacks import TensorBoard
-
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-# Parameters
+# Misc
 num_freqs = 64
 sample_rate = 16000
+num_files_per_word = 1
 colors = ['r.', 'g.', 'b.', 'y.', 'k.', 'm.', 'c.']
 base_dir = './data/speech/speech_commands_v0.02/{}'
+words = ['dog', 'happy', 'forward', 'sheila', 'six', 'right', 'up']
 
 # Read data
-word_0 = sndread_dir(base_dir.format('dog'), num_files=5)
-word_1 = sndread_dir(base_dir.format('happy'), num_files=5)
-word_2 = sndread_dir(base_dir.format('forward'), num_files=5)
-
-# X = np.vstack((word_0, word_1, word_2))
-
-# # Spectrograms
-# x_train = tf.stack([
-#     np.expand_dims(np.abs(real_spectrogram(word, num_freqs)), axis=-1)
-#     for word in X
-# ])
+x_train = tf.stack([
+    np.expand_dims(np.abs(real_spectrogram(word_audio, num_freqs)), axis=-1)
+    for word_audio in np.vstack([
+        sndread_dir(base_dir.format(word), num_files_per_word)
+        for word in words
+    ])
+])
 
 
-# # Convolutions
-# input_img = Input(shape=(num_freqs, sample_rate, 1))
+# Convolutions
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(num_freqs, sample_rate, 1)),
+    tf.keras.layers.Conv2D(16, (3, 3), activation='relu', padding='same'),
+    tf.keras.layers.MaxPooling2D((2, 2), padding='same'),
+    tf.keras.layers.Conv2D(8, (3, 3), activation='relu', padding='same'),
+    tf.keras.layers.UpSampling2D((2, 2)),
+    tf.keras.layers.Conv2D(1, (3, 3), activation='sigmoid', padding='same'),
+])
 
-# x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
-# encoded = MaxPooling2D((2, 2), padding='same')(x)
+model.compile(optimizer='adam', loss='binary_crossentropy')
 
-# x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
-# x = UpSampling2D((2, 2))(x)
-
-# decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
-
-# autoencoder = Model(input_img, decoded)
-# autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
-
-
-# autoencoder.fit(x_train, x_train,
-#                 epochs=200,
-#                 steps_per_epoch=1,
-#                 callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+model.fit(x=x_train,
+          y=x_train,
+          epochs=10,
+          steps_per_epoch=1,
+          callbacks=[
+              tf.keras.callbacks.TensorBoard(log_dir='/tmp/autoencoder')
+          ])
