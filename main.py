@@ -1,52 +1,42 @@
-from tools.plot import slide
-from tools.io import specread_dir
-from tools.audio import real_spectrogram
-
+from tools.loaders import SpeechCommands
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-
 
 # Setup
-base_dir = './data/audio/speech_commands/spec/{}'
-
 colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
           'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
 
-words = ['backward', 'bird', 'marvin']
+words = ['backward', 'bird', 'marvin', 'happy']
 
 # Parameters
 sample_rate = 16000
 num_freqs = 64
-num_files = 50
+num_files = 20
 num_classes = len(words)
 num_examples = num_classes * num_files
+labels = np.arange(num_examples) // num_files
 
 # Read data
-x_train = tf.convert_to_tensor(np.vstack([
-    specread_dir(base_dir.format(word), num_files)
-    for word in words
-]))
-
-y_train = tf.keras.utils.to_categorical(np.arange(num_examples) // num_files)
+x_train = SpeechCommands.load_spec(words)
+y_train = tf.keras.utils.to_categorical(labels)
 
 # Construct model
 model = tf.keras.Sequential()
 
 model.add(tf.keras.layers.Input(shape=x_train.shape[1:]))
 
-model.add(tf.keras.layers.Conv2D(16, (3, 3), padding='same'))
+model.add(tf.keras.layers.Conv2D(4, (3, 3), padding='same'))
 model.add(tf.keras.layers.Activation('relu'))
 model.add(tf.keras.layers.MaxPooling2D(pool_size=(1, 32)))
 
-model.add(tf.keras.layers.Conv2D(16, (3, 3), padding='same'))
+model.add(tf.keras.layers.Conv2D(4, (3, 3), padding='same'))
 model.add(tf.keras.layers.Activation('relu'))
 model.add(tf.keras.layers.MaxPooling2D(pool_size=(4, 32)))
 
-model.add(tf.keras.layers.Conv2D(16, (1, 1), padding='same'))
+model.add(tf.keras.layers.Conv2D(4, (1, 1), padding='same'))
 model.add(tf.keras.layers.Activation('relu'))
 
 model.add(tf.keras.layers.Conv2D(4, (1, 1), padding='same'))

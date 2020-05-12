@@ -55,28 +55,3 @@ def sndread(path):
 def play(data, fs=44100):
     write('./data/output.wav', fs, data)
     subprocess.call(["afplay", './data/output.wav'])
-
-
-def load_corpus(path):
-    abs_file_path = abs_path(path)
-
-    with open(abs_file_path) as fs:
-        no_punctuation = str.maketrans('', '', string.punctuation)
-        corpus = fs.read().lower().translate(no_punctuation).split()
-
-    return corpus
-
-
-def make_vocab(corpus):
-    word_to_id = {}
-    id_to_word = {}
-
-    identity = 0
-
-    for word in corpus:
-        if word not in word_to_id:
-            word_to_id[word] = identity
-            id_to_word[identity] = word
-            identity += 1
-
-    return word_to_id, id_to_word
