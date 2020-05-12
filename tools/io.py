@@ -14,6 +14,16 @@ def join_paths(*paths):
     return os.path.join(*paths)
 
 
+def specread_dir(dir_path, num_files=None):
+    abs_dir_path = abs_path(dir_path)
+    abs_file_paths = os.listdir(abs_dir_path)[:num_files]
+
+    return np.stack([
+        specread(join_paths(abs_dir_path, path))
+        for path in abs_file_paths
+    ], axis=0)
+
+
 def sndread_dir(dir_path, num_files=None):
     abs_dir_path = abs_path(dir_path)
     abs_file_paths = os.listdir(abs_dir_path)[:num_files]
@@ -29,6 +39,10 @@ def sndread_dir(dir_path, num_files=None):
         samples.append(aligned_sample)
 
     return np.vstack(tuple(samples))
+
+
+def specread(path):
+    return np.load(abs_path(path))
 
 
 def sndread(path):
