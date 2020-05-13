@@ -9,19 +9,25 @@ import matplotlib.pyplot as plt
 colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
           'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
 
-words = ['backward', 'bird', 'marvin', 'happy']
+# words = ['backward', 'bird', 'marvin', 'happy', 'cat', 'house']
+words = ['backward', 'bed', 'bird', 'cat', 'dog',
+         'down', 'eight', 'five', 'follow', 'forward',
+         'four', 'go', 'happy', 'house', 'learn', 'left',
+         'nine', 'no', 'off', 'on', 'one', 'right', 'marvin',
+         'seven', 'sheila', 'six', 'stop', 'three', 'tree',
+         'two', 'up',  'visual', 'wow', 'yes', 'zero']
 
 # Parameters
-sample_rate = 16000
-num_freqs = 64
-num_files = 20
+num_files = 3
 num_classes = len(words)
 num_examples = num_classes * num_files
 labels = np.arange(num_examples) // num_files
 
-# Read data
-x_train = SpeechCommands.load_spec(words)
+# Training data
+x_train = SpeechCommands.load_spec(words, num_files)
 y_train = tf.keras.utils.to_categorical(labels)
+
+x_val = SpeechCommands.load_spec(words)
 
 # Construct model
 model = tf.keras.Sequential()
@@ -47,19 +53,19 @@ model.add(tf.keras.layers.Dense(num_classes))
 model.add(tf.keras.layers.Activation('softmax'))
 
 model.compile(optimizer='adam', loss='categorical_crossentropy')
-model.fit(x=x_train, y=y_train, batch_size=20, epochs=100)
+# model.fit(x=x_train, y=y_train, batch_size=20, epochs=100)
 
 # Embeddings
-dense = tf.keras.Model(inputs=model.input, outputs=model.layers[-2].output)
-predictions = dense.predict(x_train).reshape(num_examples, -1)
+# dense = tf.keras.Model(inputs=model.input, outputs=model.layers[-2].output)
+# predictions = dense.predict(x_train).reshape(num_examples, -1)
 
-lda = LDA(n_components=2)
-embeddings = lda.fit_transform(predictions, labels)
+# lda = LDA(n_components=2)
+# embeddings = lda.fit_transform(predictions, labels)
 
 # Plot
-for i, (color, word) in enumerate(zip(colors, words)):
-    plt.scatter(embeddings[labels == i, 0],
-                embeddings[labels == i, 1], c=color, label=word)
+# for i, (color, word) in enumerate(zip(colors, words)):
+#     plt.scatter(embeddings[labels == i, 0],
+#                 embeddings[labels == i, 1], c=color, label=word)
 
-plt.legend()
-plt.show()
+# plt.legend()
+# plt.show()
