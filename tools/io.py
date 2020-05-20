@@ -14,11 +14,22 @@ def join_paths(*paths):
     return os.path.join(*paths)
 
 
-def sndread_dir(dir_path):
+def specread_dir(dir_path, num_files=None):
     abs_dir_path = abs_path(dir_path)
+    abs_file_paths = os.listdir(abs_dir_path)[:num_files]
+
+    return np.stack([
+        specread(join_paths(abs_dir_path, path))
+        for path in abs_file_paths
+    ], axis=0)
+
+
+def sndread_dir(dir_path, num_files=None):
+    abs_dir_path = abs_path(dir_path)
+    abs_file_paths = os.listdir(abs_dir_path)[:num_files]
 
     samples = []
-    for path in os.listdir(abs_dir_path):
+    for path in abs_file_paths:
         sample_rate, sample = sndread(join_paths(abs_dir_path, path))
 
         align_ratio = int(np.ceil(sample.size / sample_rate))
@@ -28,6 +39,10 @@ def sndread_dir(dir_path):
         samples.append(aligned_sample)
 
     return np.vstack(tuple(samples))
+
+
+def specread(path):
+    return np.load(abs_path(path))
 
 
 def sndread(path):
@@ -40,28 +55,3 @@ def sndread(path):
 def play(data, fs=44100):
     write('./data/output.wav', fs, data)
     subprocess.call(["afplay", './data/output.wav'])
-
-
-def load_corpus(path):
-    abs_file_path = abs_path(path)
-
-    with open(abs_file_path) as fs:
-        no_punctuation = str.maketrans('', '', string.punctuation)
-        corpus = fs.read().lower().translate(no_punctuation).split()
-
-    return corpus
-
-
-def make_vocab(corpus):
-    word_to_id = {}
-    id_to_word = {}
-
-    identity = 0
-
-    for word in corpus:
-        if word not in word_to_id:
-            word_to_id[word] = identity
-            id_to_word[identity] = word
-            identity += 1
-
-    return word_to_id, id_to_word

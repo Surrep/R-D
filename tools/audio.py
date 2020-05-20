@@ -1,3 +1,4 @@
+import math
 import numpy as np
 
 
@@ -21,15 +22,15 @@ def dft(signal, freqs, sample_rate=44100):
     return spectrogram
 
 
-def real_spectrogram(signal, num_freqs):
-    num_samples = len(signal)
+def real_spectrogram(signal, num_freqs, skip=1):
     num_freqs_adjusted = num_freqs * 2 - 1
+    num_samples_adjusted = math.ceil(len(signal) / skip)
 
-    result = np.zeros((num_freqs, num_samples), complex)
+    result = np.zeros((num_freqs, num_samples_adjusted), complex)
 
-    for si in range(num_samples):
+    for i, si in enumerate(range(0, len(signal), skip)):
         samples = signal[si:si+num_freqs_adjusted]
-        result[:, si] = np.fft.rfft(samples, num_freqs_adjusted)
+        result[:, i] = np.fft.rfft(samples, num_freqs_adjusted)
 
     return result
 

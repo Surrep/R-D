@@ -1,50 +1,98 @@
-from tools.io import sndread_dir, play
-from tools.audio import real_spectrogram, real_inv_spectrogram
-
-from tensorflow.keras import backend as K
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Dense, Conv2D, MaxPooling2D, UpSampling2D
-from tensorflow.keras.callbacks import TensorBoard
+from tools.loaders import SpeechCommands
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
+# Utility Functions
+def show(title):
+    plt.title(title)
+    plt.legend()
+    plt.show()
+
+
+def sample(items, size):
+    sample_range = range(len(items))
+
+    return [(items[i], i) for i in np.random.choice(sample_range, size, False)]
+
+
+# Setup
+words = SpeechCommands.all_words
+
+rhymes = [('forward', 9), ('backward', 0), ('tree', 28),
+          ('sheila', 24), ('three', 27), ('go', 11), ('no', 17)]
+
+colors = ['tab:blue', 'tab:orange', 'tab:green',
+          'tab:red', 'tab:purple', 'tab:brown', 'tab:pink']
+
 # Parameters
-num_freqs = 64
-sample_rate = 16000
-colors = ['r.', 'g.', 'b.', 'y.', 'k.', 'm.', 'c.']
-
-# Read data
-word_0 = sndread_dir('./data/speech/speech_commands_v0.02/dog')[:5]
-word_1 = sndread_dir('./data/speech/speech_commands_v0.02/happy')[:5]
-word_2 = sndread_dir('./data/speech/speech_commands_v0.02/forward')[:5]
-
-X = np.vstack((word_0, word_1, word_2))
-
-# Spectrograms
-x_train = tf.stack([
-    np.expand_dims(np.abs(real_spectrogram(word, num_freqs)), axis=-1)
-    for word in X
-])
+samples = 4
+dim_embed = 2
+num_files = 1000
+num_classes = len(words)
+num_examples = num_classes * num_files
+labels = np.arange(num_examples) // num_files
 
 
-# Convolutions
-input_img = Input(shape=(num_freqs, sample_rate, 1))
+# Training Data
+x_raw = SpeechCommands.load_raw(words, num_files)
+x_train = tf.expand_dims(SpeechCommands.load_spec(words, num_files), -1)
+y_train = tf.keras.utils.to_categorical(labels)
 
-x = Conv2D(16, (3, 3), activation='relu', padding='same')(input_img)
-encoded = MaxPooling2D((2, 2), padding='same')(x)
+# Model
+model = tf.keras.Sequential()
 
-x = Conv2D(8, (3, 3), activation='relu', padding='same')(encoded)
-x = UpSampling2D((2, 2))(x)
+model.add(tf.keras.layers.Input(shape=x_train.shape[1:]))
 
-decoded = Conv2D(1, (3, 3), activation='sigmoid', padding='same')(x)
+model.add(tf.keras.layers.Conv2D(32, (3, 3), padding='same'))
+model.add(tf.keras.layers.Activation('relu'))
 
-autoencoder = Model(input_img, decoded)
-autoencoder.compile(optimizer='adam', loss='binary_crossentropy')
+model.add(tf.keras.layers.Conv2D(32, (3, 3)))
+model.add(tf.keras.layers.Activation('relu'))
+model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+model.add(tf.keras.layers.Dropout(0.25))
 
+model.add(tf.keras.layers.Conv2D(64, (3, 3), padding='same'))
+model.add(tf.keras.layers.Activation('relu'))
 
-autoencoder.fit(x_train, x_train,
-                epochs=200,
-                steps_per_epoch=1,
-                callbacks=[TensorBoard(log_dir='/tmp/autoencoder')])
+model.add(tf.keras.layers.Conv2D(64, (3, 3)))
+model.add(tf.keras.layers.Activation('relu'))
+model.add(tf.keras.layers.MaxPooling2D(pool_size=(2, 2)))
+model.add(tf.keras.layers.Dropout(0.25))
+
+model.add(tf.keras.layers.Flatten())
+model.add(tf.keras.layers.Dense(num_classes))
+model.add(tf.keras.layers.Activation('softmax'))
+
+model.compile(optimizer='adam', loss='categorical_crossentropy')
+model.fit(x=x_train, y=y_train, batch_size=100, epochs=8)
+
+# Convolutional LDA Plot
+layer_model = tf.keras.Model(inputs=model.input,
+                             outputs=model.layers[-2].output)  # dense
+
+predictions = layer_model.predict(x_train).reshape(num_examples, -1)
+
+lda = LDA(n_components=dim_embed)
+embeddings = lda.fit_transform(predictions, labels)
+
+for color, (word, i) in zip(colors, rhymes):
+    plt.scatter(embeddings[labels == i, 0],
+                embeddings[labels == i, 1], c=color, label=word)
+
+show('Convolutional LDA as Applied to Rhyming Words')
+
+# Conventional LDA Plot
+raw_clips = np.vstack([x_raw[labels == i] for _, i in rhymes])
+raw_labels = np.vstack([labels[labels == i] for _, i in rhymes]).ravel()
+
+lda = LDA(n_components=dim_embed)
+raw_embeddings = lda.fit_transform(raw_clips, raw_labels)
+
+for color, (word, i) in zip(colors, rhymes):
+    plt.scatter(raw_embeddings[raw_labels == i, 0],
+                raw_embeddings[raw_labels == i, 1], c=color, label=word)
+
+show('Conventional LDA as Applied to Rhyming Words')
