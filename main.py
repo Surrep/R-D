@@ -5,9 +5,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-# Utils
-
-
+# Utility Functions
 def show(title):
     plt.title(title)
     plt.legend()
@@ -84,9 +82,9 @@ for color, (word, i) in zip(colors, rhymes):
     plt.scatter(embeddings[labels == i, 0],
                 embeddings[labels == i, 1], c=color, label=word)
 
-show('Convolutional LDA as applied to rhyming words')
+show('Convolutional LDA as Applied to Rhyming Words')
 
-# Raw LDA Plot
+# Conventional LDA Plot
 raw_clips = np.vstack([x_raw[labels == i] for _, i in rhymes])
 raw_labels = np.vstack([labels[labels == i] for _, i in rhymes]).ravel()
 
@@ -97,4 +95,4 @@ for color, (word, i) in zip(colors, rhymes):
     plt.scatter(raw_embeddings[raw_labels == i, 0],
                 raw_embeddings[raw_labels == i, 1], c=color, label=word)
 
-show('Conventional LDA as applied to rhyming words')
+show('Conventional LDA as Applied to Rhyming Words')
